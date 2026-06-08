@@ -1,4 +1,4 @@
-package com.earth_chat.config;
+package com.earth_chat.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
