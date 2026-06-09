@@ -30,7 +30,10 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {
                     @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
-            }, description = "성공 시 반환")
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "400", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "이미 가입된 닉네임 or 이메일일 경우 발생")
     })
     @PostMapping("/register")
     public ResponseEntity<ResponseWrapper> register(
