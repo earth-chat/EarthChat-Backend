@@ -2,11 +2,11 @@ package com.earth_chat.auth.service.impl;
 
 import com.earth_chat.auth.controller.request.RegisterRequest;
 import com.earth_chat.auth.controller.response.RegisterResponse;
-import com.earth_chat.auth.mapper.AuthMapper;
 import com.earth_chat.auth.service.AuthService;
 import com.earth_chat.common.enums.UserStatus;
 import com.earth_chat.common.exception.AlreadyExistsEmailException;
 import com.earth_chat.common.exception.AlreadyExistsNicknameException;
+import com.earth_chat.user.service.UserService;
 import com.earth_chat.user.vo.UserVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final AuthMapper authMapper;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -25,11 +25,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
 
-        if (authMapper.existsEmail(registerRequest.getEmail())) {
+        if (userService.existsEmail(registerRequest.getEmail())) {
             throw new AlreadyExistsEmailException("이미 가입된 이메일입니다.");
         }
 
-        if (authMapper.existsNickname(registerRequest.getNickname())) {
+        if (userService.existsNickname(registerRequest.getNickname())) {
             throw new AlreadyExistsNicknameException("이미 가입된 닉네임입니다.");
         }
 
@@ -41,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
                 .userStatus(UserStatus.EMAIL_AUTH)
                 .build();
 
-        authMapper.insertUser(userVo);
+        userService.insertUser(userVo);
 
         return RegisterResponse.builder()
                 .userSeq(userVo.getUserSeq())
