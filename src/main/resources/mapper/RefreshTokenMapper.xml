@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.earth_chat.auth.mapper.RefreshTokenMapper">
+
+    <insert id="insertRefreshToken" parameterType="com.earth_chat.auth.vo.RefreshTokenVo" keyColumn="token_seq" keyProperty="tokenSeq" useGeneratedKeys="true">
+        INSERT INTO refresh_token_info(user_seq, token_value, expired_at, use_yn, reg_dt)
+        VALUES (#{userSeq}, #{tokenValue}, #{expiredAt}, #{useYn}, #{regDt})
+    </insert>
+
+</mapper>
