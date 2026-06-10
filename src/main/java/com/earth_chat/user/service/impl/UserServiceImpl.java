@@ -2,9 +2,12 @@ package com.earth_chat.user.service.impl;
 
 import com.earth_chat.user.mapper.UserMapper;
 import com.earth_chat.user.service.UserService;
+import com.earth_chat.user.vo.RoleVo;
 import com.earth_chat.user.vo.UserVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +37,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public int insertUser(UserVo userVo) {
         return userMapper.insertUser(userVo);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserVo selectUserByEmail(String email) {
+        return userMapper.selectUserByEmail(email);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<RoleVo> selectRolesByUserSeq(Long userSeq) {
+        return userMapper.selectRolesByUserSeq(userSeq);
     }
 }

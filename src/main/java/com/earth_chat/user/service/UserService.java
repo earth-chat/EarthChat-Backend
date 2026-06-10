@@ -1,6 +1,9 @@
 package com.earth_chat.user.service;
 
+import com.earth_chat.user.vo.RoleVo;
 import com.earth_chat.user.vo.UserVo;
+
+import java.util.List;
 
 public interface UserService {
 
@@ -24,4 +27,18 @@ public interface UserService {
      * @return int
      */
     int insertUser(UserVo userVo);
+
+    /**
+     * 이메일을 통한 사용자 데이터 조회.
+     * @param email 이메일
+     * @return 사용자 데이터
+     */
+    UserVo selectUserByEmail(String email);
+
+    /**
+     * 사용자 역할 리스트 조회.
+     * @param userSeq 사용자 SEQ
+     * @return List<RoleVo>
+     */
+    List<RoleVo> selectRolesByUserSeq(Long userSeq);
 }
