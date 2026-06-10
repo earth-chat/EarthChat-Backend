@@ -40,11 +40,12 @@
         )
     </insert>
 
-    <select id="selectByEmail">
+    <select id="selectUserByEmail" resultType="com.earth_chat.user.vo.UserVo" parameterType="string">
         SELECT
-            u.user_seq
+            u.user_seq,
             u.email,
             u.nickname,
+            u.pwd,
             u.use_yn,
             u.translate_code,
             u.user_status,
@@ -52,5 +53,16 @@
             u.mod_dt
         FROM user_info u
         WHERE u.email = #{email}
+    </select>
+
+    <select id="selectRolesByUserSeq" resultType="com.earth_chat.user.vo.RoleVo" parameterType="long">
+        SELECT
+            r.role_seq,
+            r.role_name,
+            r.admin_yn
+        FROM user_role ur
+        INNER JOIN role_info r
+        ON ur.role_seq = r.role_seq
+        WHERE ur.user_seq = #{userSeq}
     </select>
 </mapper>

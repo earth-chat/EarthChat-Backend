@@ -1,8 +1,11 @@
 package com.earth_chat.user.mapper;
 
+import com.earth_chat.user.vo.RoleVo;
 import com.earth_chat.user.vo.UserVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 @Mapper
 public interface UserMapper {
@@ -27,4 +30,18 @@ public interface UserMapper {
      * @return int
      */
     int insertUser(UserVo userVo);
+
+    /**
+     * 이메일을 통한 사용자 데이터 조회.
+     * @param email 이메일
+     * @return 사용자 데이터
+     */
+    UserVo selectUserByEmail(@Param("email") String email);
+
+    /**
+     * 사용자 역할 리스트 조회.
+     * @param userSeq 사용자 SEQ
+     * @return List<RoleVo>
+     */
+    List<RoleVo> selectRolesByUserSeq(@Param("userSeq") Long userSeq);
 }
