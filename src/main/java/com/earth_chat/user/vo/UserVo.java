@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -40,4 +41,7 @@ public class UserVo {
 
     // 수정일시
     private LocalDateTime modDt;
+
+    // 역할 목록
+    private List<RoleVo> roleList;
 }
