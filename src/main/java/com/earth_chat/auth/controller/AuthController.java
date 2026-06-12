@@ -1,30 +1,60 @@
 package com.earth_chat.auth.controller;
 
+import com.earth_chat.auth.controller.request.LoginRequest;
 import com.earth_chat.auth.controller.request.RegisterRequest;
 import com.earth_chat.auth.service.AuthService;
 import com.earth_chat.common.util.ResponseWrapper;
 import com.earth_chat.common.util.ResponseWrapperUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Tag(name = "Auth Controller API", description = "사용자 인증 관련 API Controller")
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
+
+    @Operation(summary = "이메일 중복 확인 API", description = "이메일 중복 확인 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content ={
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "성공 시 반환")
+    })
+    @GetMapping("/existsEmail")
+    public ResponseEntity<ResponseWrapper> existsEmail(
+            @Parameter(required = true, description = "이메일")
+            @RequestParam(required = true) String email
+    ) {
+        return ResponseWrapperUtil.success("success", authService.existsEmail(email));
+    }
+
+    @Operation(summary = "닉네임 중복 확인 API", description = "닉네임 중복 확인 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content ={
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "성공 시 반환")
+    })
+    @GetMapping("/existsNickname")
+    public ResponseEntity<ResponseWrapper> existsNickname(
+            @Parameter(required = true, description = "닉네임")
+            @RequestParam(required = true) String nickname
+    ) {
+        return ResponseWrapperUtil.success("success", authService.existsNickname(nickname));
+    }
 
     @Operation(summary = "회원가입 API", description = "사용자 회원가입 API")
     @ApiResponses(value = {
@@ -45,8 +75,37 @@ public class AuthController {
                             schema = @Schema(implementation = RegisterRequest.class)
                     )
             )
-            @RequestBody RegisterRequest request
+            @RequestBody RegisterRequest request,
+            @RequestHeader(name = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage
     ) {
+        log.debug("language : {}", acceptLanguage);
         return ResponseWrapperUtil.success("success", authService.register(request));
+    }
+
+    @Operation(summary = "로그인 API", description = "사용자 로그인 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "400", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "일치하지 않는 비밀번호일 경우 발생"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "사용자를 찾지 못할 경우 발생"),
+    })
+    @PostMapping("/login")
+    public ResponseEntity<ResponseWrapper> login(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "로그인 요청 객체",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = LoginRequest.class)
+                    )
+            )
+            @RequestBody LoginRequest loginRequest
+    ) {
+        return ResponseWrapperUtil.success("success", authService.login(loginRequest));
     }
 }

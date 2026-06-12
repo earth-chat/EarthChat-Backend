@@ -1,7 +1,11 @@
 package com.earth_chat.auth.service;
 
+import com.earth_chat.auth.controller.request.LoginRequest;
 import com.earth_chat.auth.controller.request.RegisterRequest;
+import com.earth_chat.auth.controller.response.LoginResponse;
 import com.earth_chat.auth.controller.response.RegisterResponse;
+
+import java.util.Map;
 
 public interface AuthService {
 
@@ -10,5 +14,26 @@ public interface AuthService {
      * @param registerRequest 회원가입 요청 객체
      * @return RegisterResponse
      */
-    public RegisterResponse register(RegisterRequest registerRequest);
+    RegisterResponse register(RegisterRequest registerRequest);
+
+    /**
+     * 로그인 처리 메서드.
+     * @param loginRequest 로그인 요청 객체
+     * @return LoginResponse
+     */
+    LoginResponse login(LoginRequest loginRequest);
+
+    /**
+     * 가입된 이메일이 있는지 확인.
+     * @param email 이메일
+     * @return boolean
+     */
+    Map<String, Object> existsEmail(String email);
+
+    /**
+     * 가입된 닉네임이 있는지 확인.
+     * @param nickname 닉네임
+     * @return boolean
+     */
+    Map<String, Object> existsNickname(String nickname);
 }
