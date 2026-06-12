@@ -6,8 +6,13 @@
 <mapper namespace="com.earth_chat.auth.mapper.RefreshTokenMapper">
 
     <insert id="insertRefreshToken" parameterType="com.earth_chat.auth.vo.RefreshTokenVo" keyColumn="token_seq" keyProperty="tokenSeq" useGeneratedKeys="true">
-        INSERT INTO refresh_token_info(user_seq, token_value, expired_at, use_yn, reg_dt)
-        VALUES (#{userSeq}, #{tokenValue}, #{expiredAt}, #{useYn}, #{regDt})
+        INSERT INTO refresh_token_info(user_seq, token_value, expired_dt, use_yn, reg_dt, mod_dt)
+        VALUES (#{userSeq}, #{tokenValue}, #{expiredDt}, #{useYn}, #{regDt}, #{modDt})
+        ON CONFLICT (user_seq)
+        DO UPDATE
+        SET token_value = #{tokenValue},
+        expired_dt = #{expiredDt},
+        mod_dt = #{modDt}
     </insert>
 
 </mapper>

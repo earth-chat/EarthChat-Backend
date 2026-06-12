@@ -2,11 +2,13 @@ package com.earth_chat.common.exception.handler;
 
 import com.earth_chat.common.exception.AlreadyExistsEmailException;
 import com.earth_chat.common.exception.AlreadyExistsNicknameException;
+import com.earth_chat.common.exception.PasswordNotMatchesException;
 import com.earth_chat.common.util.ResponseWrapper;
 import com.earth_chat.common.util.ResponseWrapperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -18,11 +20,42 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(value = {
             AlreadyExistsEmailException.class,
-            AlreadyExistsNicknameException.class
+            AlreadyExistsNicknameException.class,
     })
     public ResponseEntity<ResponseWrapper> badRequest(Exception e) {
         log.error("Bad Request 발생 : ", e);
 
         return ResponseWrapperUtil.fail(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {
+            PasswordNotMatchesException.class
+    })
+    public ResponseEntity<ResponseWrapper> passwordNotMatchesException(PasswordNotMatchesException e) {
+        log.error("Bad Request 발생 : ", e);
+
+        return ResponseWrapperUtil.fail(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    // 404
+
+    @ExceptionHandler(value = {
+            UsernameNotFoundException.class
+    })
+    public ResponseEntity<ResponseWrapper> notFound(Exception e) {
+        log.error("Not Found 발생 : ", e);
+
+        return ResponseWrapperUtil.fail(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    // 500
+
+    @ExceptionHandler(value = {
+            Exception.class
+    })
+    public ResponseEntity<ResponseWrapper> internalServerError(Exception e) {
+        log.error("Internal Server Error : ", e);
+
+        return ResponseWrapperUtil.fail(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

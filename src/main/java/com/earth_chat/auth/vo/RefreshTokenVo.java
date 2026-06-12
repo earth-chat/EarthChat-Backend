@@ -23,12 +23,15 @@ public class RefreshTokenVo {
     private String tokenValue;
 
     // 만료일시
-    private LocalDateTime expiredAt;
+    private LocalDateTime expiredDt;
 
     // 사용 여부
     private String useYn;
 
     // 등록일시
     private LocalDateTime regDt;
+
+    // 수정일시
+    private LocalDateTime modDt;
 
 }

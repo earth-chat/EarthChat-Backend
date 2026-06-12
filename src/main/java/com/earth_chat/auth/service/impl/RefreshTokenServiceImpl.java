@@ -40,9 +40,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshTokenVo refreshToken = RefreshTokenVo.builder()
                 .userSeq(userVo.getUserSeq())
                 .tokenValue(UUID.randomUUID().toString())
-                .expiredAt(now.plusSeconds(refreshTokenExpiredTime / 1000))
+                .expiredDt(now.plusSeconds(refreshTokenExpiredTime / 1000))
                 .useYn("Y")
                 .regDt(now)
+                .modDt(now)
                 .build();
 
         refreshTokenMapper.insertRefreshToken(refreshToken);
