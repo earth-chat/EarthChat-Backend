@@ -54,4 +54,20 @@ public class UserServiceImpl implements UserService {
     public List<RoleVo> selectRolesByUserSeq(Long userSeq) {
         return userMapper.selectRolesByUserSeq(userSeq);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<RoleVo> selectUserRoles() {
+        return userMapper.selectUserRoles();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int insertUserRole(UserVo userVo) {
+        return userMapper.insertUserRole(userVo);
+    }
 }

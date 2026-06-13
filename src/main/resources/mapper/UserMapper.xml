@@ -65,4 +65,20 @@
         ON ur.role_seq = r.role_seq
         WHERE ur.user_seq = #{userSeq}
     </select>
+
+    <select id="selectUserRoles" resultType="com.earth_chat.user.vo.RoleVo">
+        SELECT
+            r.role_seq,
+            r.role_name
+        FROM role_info r
+        WHERE r.admin_yn = 'N'
+    </select>
+
+    <insert id="insertUserRole" parameterType="com.earth_chat.user.vo.UserVo">
+        INSERT INTO user_role (user_seq, role_seq)
+        VALUES
+        <foreach collection="roleList" item="role" separator=",">
+            (#{userSeq}, #{role.roleSeq})
+        </foreach>
+    </insert>
 </mapper>

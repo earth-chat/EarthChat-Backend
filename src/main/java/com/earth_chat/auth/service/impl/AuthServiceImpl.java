@@ -14,6 +14,7 @@ import com.earth_chat.common.exception.AlreadyExistsEmailException;
 import com.earth_chat.common.exception.AlreadyExistsNicknameException;
 import com.earth_chat.common.jwt.JwtTokenProvider;
 import com.earth_chat.user.service.UserService;
+import com.earth_chat.user.vo.RoleVo;
 import com.earth_chat.user.vo.UserVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -50,15 +52,19 @@ public class AuthServiceImpl implements AuthService {
             throw new AlreadyExistsNicknameException("이미 가입된 닉네임입니다.");
         }
 
+        List<RoleVo> roleList = userService.selectUserRoles();
+
         UserVo userVo = UserVo.builder()
                 .email(registerRequest.getEmail())
                 .nickname(registerRequest.getNickname())
                 .pwd(passwordEncoder.encode(registerRequest.getPassword()))
                 .translateCode(registerRequest.getTranslateCode())
                 .userStatus(UserStatus.EMAIL_AUTH)
+                .roleList(roleList)
                 .build();
 
         userService.insertUser(userVo);
+        userService.insertUserRole(userVo);
 
         return RegisterResponse.builder()
                 .userSeq(userVo.getUserSeq())

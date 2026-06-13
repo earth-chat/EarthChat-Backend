@@ -44,4 +44,17 @@ public interface UserMapper {
      * @return List<RoleVo>
      */
     List<RoleVo> selectRolesByUserSeq(@Param("userSeq") Long userSeq);
+
+    /**
+     * 사용자 할당용 역할 리스트 조회.
+     * @return List<RoleVo>
+     */
+    List<RoleVo> selectUserRoles();
+
+    /**
+     * 사용자 역할 삽입.
+     * @param userVo 사용자 데이터
+     * @return int
+     */
+    int insertUserRole(UserVo userVo);
 }
