@@ -1,8 +1,6 @@
 package com.earth_chat.common.exception.handler;
 
-import com.earth_chat.common.exception.AlreadyExistsEmailException;
-import com.earth_chat.common.exception.AlreadyExistsNicknameException;
-import com.earth_chat.common.exception.PasswordNotMatchesException;
+import com.earth_chat.common.exception.*;
 import com.earth_chat.common.util.ResponseWrapper;
 import com.earth_chat.common.util.ResponseWrapperUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +19,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             AlreadyExistsEmailException.class,
             AlreadyExistsNicknameException.class,
+            FailSendingMailException.class,
+            InvalidEmailAuthNumException.class
     })
     public ResponseEntity<ResponseWrapper> badRequest(Exception e) {
         log.error("Bad Request 발생 : ", e);
