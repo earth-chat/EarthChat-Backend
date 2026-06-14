@@ -2,6 +2,8 @@ package com.earth_chat.auth.controller;
 
 import com.earth_chat.auth.controller.request.LoginRequest;
 import com.earth_chat.auth.controller.request.RegisterRequest;
+import com.earth_chat.auth.controller.request.SendMailRequest;
+import com.earth_chat.auth.controller.request.ValidateMailAuthCodeRequest;
 import com.earth_chat.auth.service.AuthService;
 import com.earth_chat.common.util.ResponseWrapper;
 import com.earth_chat.common.util.ResponseWrapperUtil;
@@ -75,10 +77,8 @@ public class AuthController {
                             schema = @Schema(implementation = RegisterRequest.class)
                     )
             )
-            @RequestBody RegisterRequest request,
-            @RequestHeader(name = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage
+            @RequestBody RegisterRequest request
     ) {
-        log.debug("language : {}", acceptLanguage);
         return ResponseWrapperUtil.success("success", authService.register(request));
     }
 
@@ -107,5 +107,54 @@ public class AuthController {
             @RequestBody LoginRequest loginRequest
     ) {
         return ResponseWrapperUtil.success("success", authService.login(loginRequest));
+    }
+
+    @Operation(summary = "인증 이메일 발송 API", description = "인증 이메일 발송 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "400", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "이메일 발송 실패 시 반환")
+    })
+    @PostMapping("/email")
+    public ResponseEntity<ResponseWrapper> email(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "이메일 발송 요청 객체",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = SendMailRequest.class)
+                    )
+            )
+            @RequestBody SendMailRequest request
+    ) {
+        authService.sendMail(request);
+        return ResponseWrapperUtil.success("success");
+    }
+
+    @Operation(summary = "이메일 인증 코드 검증 API", description = "이메일 인증 코드 검증 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "400", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "인증 코드가 만료되었거나 일치하지 않을 경우 발생")
+    })
+    @PostMapping("/email/authCode")
+    public ResponseEntity<ResponseWrapper> validateEmailAuthCode(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "인증코드 검증 요청 객체",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ValidateMailAuthCodeRequest.class)
+                    )
+            )
+            @RequestBody ValidateMailAuthCodeRequest request
+    ) {
+        return ResponseWrapperUtil.success("success", authService.validateMailAuthCode(request));
     }
 }
