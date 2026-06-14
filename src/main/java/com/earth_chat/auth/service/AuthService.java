@@ -2,6 +2,8 @@ package com.earth_chat.auth.service;
 
 import com.earth_chat.auth.controller.request.LoginRequest;
 import com.earth_chat.auth.controller.request.RegisterRequest;
+import com.earth_chat.auth.controller.request.SendMailRequest;
+import com.earth_chat.auth.controller.request.ValidateMailAuthCodeRequest;
 import com.earth_chat.auth.controller.response.LoginResponse;
 import com.earth_chat.auth.controller.response.RegisterResponse;
 
@@ -36,4 +38,16 @@ public interface AuthService {
      * @return boolean
      */
     Map<String, Object> existsNickname(String nickname);
+
+    /**
+     * 메일 발송.
+     * @param request 메일 발송 요청 객체
+     */
+    void sendMail(SendMailRequest request);
+
+    /**
+     * 메일 인증코드 검증.
+     * @param request 인증코드 검증 요청 객체
+     */
+    Map<String, Object> validateMailAuthCode(ValidateMailAuthCodeRequest request);
 }

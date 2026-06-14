@@ -3,16 +3,23 @@ package com.earth_chat.auth.service.impl;
 import com.earth_chat.auth.controller.request.LoginRequest;
 import com.earth_chat.auth.controller.request.RegisterRequest;
 import com.earth_chat.auth.controller.request.SendMailRequest;
+import com.earth_chat.auth.controller.request.ValidateMailAuthCodeRequest;
 import com.earth_chat.auth.controller.response.LoginResponse;
 import com.earth_chat.auth.controller.response.RegisterResponse;
 import com.earth_chat.auth.service.AuthService;
+import com.earth_chat.auth.service.EmailAuthInfoService;
+import com.earth_chat.auth.service.EmailService;
 import com.earth_chat.auth.service.RefreshTokenService;
+import com.earth_chat.auth.vo.EmailAuthInfoVo;
 import com.earth_chat.auth.vo.RefreshTokenVo;
 import com.earth_chat.common.custom.CustomUserDetails;
+import com.earth_chat.common.enums.MailType;
 import com.earth_chat.common.enums.UserStatus;
 import com.earth_chat.common.exception.AlreadyExistsEmailException;
 import com.earth_chat.common.exception.AlreadyExistsNicknameException;
+import com.earth_chat.common.exception.InvalidEmailAuthNumException;
 import com.earth_chat.common.jwt.JwtTokenProvider;
+import com.earth_chat.common.util.AuthNumUtil;
 import com.earth_chat.user.service.UserService;
 import com.earth_chat.user.vo.RoleVo;
 import com.earth_chat.user.vo.UserVo;
@@ -23,7 +30,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +46,14 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
+    private final EmailService emailService;
+    private final EmailAuthInfoService emailAuthInfoService;
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public RegisterResponse register(RegisterRequest registerRequest) {
 
         if (userService.existsEmail(registerRequest.getEmail())) {
@@ -59,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
                 .nickname(registerRequest.getNickname())
                 .pwd(passwordEncoder.encode(registerRequest.getPassword()))
                 .translateCode(registerRequest.getTranslateCode())
-                .userStatus(UserStatus.EMAIL_AUTH)
+                .userStatus(UserStatus.COMPLETED)
                 .roleList(roleList)
                 .build();
 
@@ -78,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
         UserVo userVo = userService.selectUserByEmail(loginRequest.getEmail());
         if (userVo == null) {
@@ -125,4 +138,70 @@ public class AuthServiceImpl implements AuthService {
 
         return result;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void sendMail(SendMailRequest request) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expiredDt = now.plusMinutes(3);
+
+        EmailAuthInfoVo emailAuthInfoVo = EmailAuthInfoVo.builder()
+                .authNum(AuthNumUtil.generateAuthNum(6))
+                .email(request.getEmail())
+                .useYn("Y")
+                .expiredDt(expiredDt)
+                .regDt(now)
+                .build();
+
+        EmailAuthInfoVo authInfo = emailAuthInfoService.selectEmailAuthInfoByEmail(emailAuthInfoVo.getEmail());
+        if (authInfo != null) {
+            authInfo.setUseYn("N");
+            emailAuthInfoService.updateEmailAuthInfo(authInfo);
+        }
+
+        emailAuthInfoService.insertEmailAuthInfo(emailAuthInfoVo);
+        emailService.sendAuthCodeMail(emailAuthInfoVo);
+    }
+
+    @Override
+    public Map<String, Object> validateMailAuthCode(ValidateMailAuthCodeRequest request) {
+        MailType type = request.getType();
+        String email = request.getEmail();
+        String authNum = request.getAuthNum();
+        Map<String, Object> result = new HashMap<>();
+
+        switch (type) {
+            case REGISTER -> {
+                EmailAuthInfoVo authInfo = emailAuthInfoService.selectEmailAuthInfoByEmail(email);
+                if (authInfo.getUseYn().equals("N")) {
+                    throw new InvalidEmailAuthNumException("사용할 수 없는 인증 코드입니다.");
+                }
+
+                if (authInfo.getExpiredDt().isBefore(LocalDateTime.now())) {
+                    authInfo.setUseYn("N");
+                    emailAuthInfoService.updateEmailAuthInfo(authInfo);
+                    throw new InvalidEmailAuthNumException("만료된 인증 코드입니다.");
+                }
+
+                if (!authInfo.getAuthNum().equals(authNum)) {
+                    throw new InvalidEmailAuthNumException("인증 코드가 일치하지 않습니다.");
+                }
+
+                authInfo.setUseYn("N");
+                emailAuthInfoService.updateEmailAuthInfo(authInfo);
+
+                result.put("isValid", true);
+            }
+
+            case PASSWORD -> {
+                // TODO: 구현 예정
+            }
+        }
+
+        return result;
+    }
+
 }
