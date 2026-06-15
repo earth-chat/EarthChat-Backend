@@ -22,6 +22,9 @@ public class EmailAuthInfoVo {
     // 인증번호
     private String authNum;
 
+    // 인증 여부
+    private String authYn;
+
     // 사용 여부
     private String useYn;
 
@@ -30,4 +33,7 @@ public class EmailAuthInfoVo {
 
     // 등록일시
     private LocalDateTime regDt;
+
+    // 수정일시
+    private LocalDateTime modDt;
 }
