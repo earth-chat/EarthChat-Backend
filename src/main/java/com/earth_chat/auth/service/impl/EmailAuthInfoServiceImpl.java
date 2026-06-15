@@ -6,6 +6,8 @@ import com.earth_chat.auth.vo.EmailAuthInfoVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class EmailAuthInfoServiceImpl implements EmailAuthInfoService {
@@ -24,8 +26,8 @@ public class EmailAuthInfoServiceImpl implements EmailAuthInfoService {
      * {@inheritDoc}
      */
     @Override
-    public EmailAuthInfoVo selectEmailAuthInfoByEmail(String email) {
-        return emailAuthInfoMapper.selectEmailAuthInfoByEmail(email);
+    public Optional<EmailAuthInfoVo> selectEmailAuthInfoByEmail(String email) {
+        return Optional.ofNullable(emailAuthInfoMapper.selectEmailAuthInfoByEmail(email));
     }
 
     /**

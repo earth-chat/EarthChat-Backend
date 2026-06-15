@@ -4,6 +4,7 @@ import com.earth_chat.user.vo.RoleVo;
 import com.earth_chat.user.vo.UserVo;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -33,7 +34,7 @@ public interface UserService {
      * @param email 이메일
      * @return 사용자 데이터
      */
-    UserVo selectUserByEmail(String email);
+    Optional<UserVo> selectUserByEmail(String email);
 
     /**
      * 사용자 역할 리스트 조회.

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,8 +44,8 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public UserVo selectUserByEmail(String email) {
-        return userMapper.selectUserByEmail(email);
+    public Optional<UserVo> selectUserByEmail(String email) {
+        return Optional.ofNullable(userMapper.selectUserByEmail(email));
     }
 
     /**

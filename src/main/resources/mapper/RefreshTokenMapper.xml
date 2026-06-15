@@ -15,4 +15,30 @@
         mod_dt = #{modDt}
     </insert>
 
+    <select id="selectRefreshTokenByUserSeq" parameterType="string" resultType="com.earth_chat.auth.vo.RefreshTokenVo">
+        SELECT
+            r.token_seq,
+            r.token_value,
+            r.expired_dt,
+            r.use_yn
+        FROM refresh_token_info r
+        WHERE r.user_seq = #{userSeq}
+    </select>
+
+    <update id="updateRefreshToken" parameterType="com.earth_chat.auth.vo.RefreshTokenVo">
+        UPDATE refresh_token_info
+        SET use_yn = #{useYn},
+            mod_dt = NOW()
+        WHERE token_seq = #{tokenSeq}
+    </update>
+
+    <delete id="deleteRefreshTokenByTokenSeq">
+        DELETE FROM refresh_token_info
+        WHERE token_seq = #{tokenSeq}
+    </delete>
+
+    <delete id="deleteRefreshTokenByUserSeq">
+        DELETE FROM refresh_token_info
+        WHERE user_seq = #{userSeq}
+    </delete>
 </mapper>

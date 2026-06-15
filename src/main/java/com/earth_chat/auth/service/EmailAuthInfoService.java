@@ -2,6 +2,8 @@ package com.earth_chat.auth.service;
 
 import com.earth_chat.auth.vo.EmailAuthInfoVo;
 
+import java.util.Optional;
+
 public interface EmailAuthInfoService {
 
     /**
@@ -16,7 +18,7 @@ public interface EmailAuthInfoService {
      * @param email 이메일
      * @return EmailAuthInfoVo
      */
-    EmailAuthInfoVo selectEmailAuthInfoByEmail(String email);
+    Optional<EmailAuthInfoVo> selectEmailAuthInfoByEmail(String email);
 
     /**
      * 이메일 인증 정보 업데이트.

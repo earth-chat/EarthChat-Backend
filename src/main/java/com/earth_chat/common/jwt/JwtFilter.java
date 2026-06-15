@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -42,7 +43,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
             List<SimpleGrantedAuthority> auth = jwtTokenProvider.getAuthorities(claims);
 
-            UserVo user = userService.selectUserByEmail(claims.getSubject());
+            UserVo user = userService.selectUserByEmail(claims.getSubject())
+                    .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
             List<RoleVo> roleList = userService.selectRolesByUserSeq(user.getUserSeq());
             user.setRoleList(roleList);
 

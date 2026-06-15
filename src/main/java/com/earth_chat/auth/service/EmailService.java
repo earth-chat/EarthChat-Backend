@@ -1,6 +1,5 @@
 package com.earth_chat.auth.service;
 
-import com.earth_chat.auth.controller.request.SendMailRequest;
 import com.earth_chat.auth.vo.EmailAuthInfoVo;
 
 public interface EmailService {

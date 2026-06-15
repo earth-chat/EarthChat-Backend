@@ -12,6 +12,7 @@
             auth_num,
             expired_dt,
             use_yn,
+            auth_yn,
             reg_dt
         )
         VALUES
@@ -20,6 +21,7 @@
             #{authNum},
             #{expiredDt},
             #{useYn},
+            #{authYn},
             #{regDt}
         )
     </insert>
@@ -30,7 +32,8 @@
             e.email,
             e.auth_num,
             e.expired_dt,
-            e.use_yn
+            e.use_yn,
+            e.auth_yn
         FROM email_auth_info e
         WHERE e.email = #{email}
         AND e.use_yn = 'Y'
@@ -38,7 +41,9 @@
 
     <update id="updateEmailAuthInfo" parameterType="com.earth_chat.auth.vo.EmailAuthInfoVo">
         UPDATE email_auth_info
-        SET use_yn = #{useYn}
+        SET use_yn = #{useYn},
+            auth_yn = #{authYn},
+            mod_dt = NOW()
         WHERE mail_auth_seq = #{mailAuthSeq}
     </update>
 </mapper>

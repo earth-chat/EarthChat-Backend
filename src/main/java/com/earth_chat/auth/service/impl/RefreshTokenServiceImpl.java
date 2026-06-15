@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -30,10 +31,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public RefreshTokenVo createToken(CustomUserDetails customUserDetails) {
 
-        UserVo userVo = userService.selectUserByEmail(customUserDetails.getUsername());
-        if (userVo == null) {
-            throw new UsernameNotFoundException("가입되지 않은 사용자입니다.");
-        }
+        UserVo userVo = userService.selectUserByEmail(customUserDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -49,5 +48,37 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshTokenMapper.insertRefreshToken(refreshToken);
 
         return refreshToken;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<RefreshTokenVo> selectRefreshTokenByUserSeq(Long userSeq) {
+        return Optional.ofNullable(refreshTokenMapper.selectRefreshTokenByUserSeq(userSeq));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int updateRefreshToken(RefreshTokenVo refreshTokenVo) {
+        return refreshTokenMapper.updateRefreshToken(refreshTokenVo);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int deleteRefreshTokenByTokenSeq(Long tokenSeq) {
+        return refreshTokenMapper.deleteRefreshTokenByTokenSeq(tokenSeq);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int deleteRefreshTokenByUserSeq(Long userSeq) {
+        return refreshTokenMapper.deleteRefreshTokenByUserSeq(userSeq);
     }
 }
