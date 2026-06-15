@@ -75,6 +75,8 @@ public class AuthServiceImpl implements AuthService {
                 .roleList(roleList)
                 .build();
 
+        
+
         userService.insertUser(userVo);
         userService.insertUserRole(userVo);
 
@@ -92,10 +94,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
-        UserVo userVo = userService.selectUserByEmail(loginRequest.getEmail());
-        if (userVo == null) {
-            throw new UsernameNotFoundException("가입되지 않은 사용자입니다.");
-        }
+        UserVo userVo = userService.selectUserByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
@@ -152,15 +152,16 @@ public class AuthServiceImpl implements AuthService {
                 .authNum(AuthNumUtil.generateAuthNum(6))
                 .email(request.getEmail())
                 .useYn("Y")
+                .authYn("N")
                 .expiredDt(expiredDt)
                 .regDt(now)
                 .build();
 
-        EmailAuthInfoVo authInfo = emailAuthInfoService.selectEmailAuthInfoByEmail(emailAuthInfoVo.getEmail());
-        if (authInfo != null) {
-            authInfo.setUseYn("N");
-            emailAuthInfoService.updateEmailAuthInfo(authInfo);
-        }
+        emailAuthInfoService.selectEmailAuthInfoByEmail(emailAuthInfoVo.getEmail())
+                .ifPresent(authInfo -> {
+                    authInfo.setUseYn("N");
+                    emailAuthInfoService.updateEmailAuthInfo(authInfo);
+                });
 
         emailAuthInfoService.insertEmailAuthInfo(emailAuthInfoVo);
         emailService.sendAuthCodeMail(emailAuthInfoVo);
@@ -175,7 +176,9 @@ public class AuthServiceImpl implements AuthService {
 
         switch (type) {
             case REGISTER -> {
-                EmailAuthInfoVo authInfo = emailAuthInfoService.selectEmailAuthInfoByEmail(email);
+                EmailAuthInfoVo authInfo = emailAuthInfoService.selectEmailAuthInfoByEmail(email)
+                        .orElseThrow(() -> new InvalidEmailAuthNumException("잘못된 인증코드입니다."));
+
                 if (authInfo.getUseYn().equals("N")) {
                     throw new InvalidEmailAuthNumException("사용할 수 없는 인증 코드입니다.");
                 }
@@ -191,6 +194,7 @@ public class AuthServiceImpl implements AuthService {
                 }
 
                 authInfo.setUseYn("N");
+                authInfo.setAuthYn("Y");
                 emailAuthInfoService.updateEmailAuthInfo(authInfo);
 
                 result.put("isValid", true);
@@ -202,6 +206,18 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void logout(CustomUserDetails customUserDetails) {
+        String email = customUserDetails.getUsername();
+        UserVo user = userService.selectUserByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+
+        refreshTokenService.deleteRefreshTokenByUserSeq(user.getUserSeq());
     }
 
 }

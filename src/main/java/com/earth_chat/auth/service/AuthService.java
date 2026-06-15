@@ -6,6 +6,7 @@ import com.earth_chat.auth.controller.request.SendMailRequest;
 import com.earth_chat.auth.controller.request.ValidateMailAuthCodeRequest;
 import com.earth_chat.auth.controller.response.LoginResponse;
 import com.earth_chat.auth.controller.response.RegisterResponse;
+import com.earth_chat.common.custom.CustomUserDetails;
 
 import java.util.Map;
 
@@ -50,4 +51,10 @@ public interface AuthService {
      * @param request 인증코드 검증 요청 객체
      */
     Map<String, Object> validateMailAuthCode(ValidateMailAuthCodeRequest request);
+
+    /**
+     * 로그아웃 처리.
+     * @param customUserDetails 인증된 사용자 객체
+     */
+    void logout(CustomUserDetails customUserDetails);
 }
