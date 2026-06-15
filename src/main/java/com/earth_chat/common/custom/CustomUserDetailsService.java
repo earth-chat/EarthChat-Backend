@@ -19,11 +19,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserVo userVo = userService.selectUserByEmail(username);
-
-        if (userVo == null) {
-            throw new UsernameNotFoundException("가입되지 않은 사용자입니다.");
-        }
+        UserVo userVo = userService.selectUserByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
 
         List<RoleVo> roleList = userService.selectRolesByUserSeq(userVo.getUserSeq());
         userVo.setRoleList(roleList);
