@@ -20,7 +20,8 @@ public class GlobalExceptionHandler {
             AlreadyExistsEmailException.class,
             AlreadyExistsNicknameException.class,
             FailSendingMailException.class,
-            InvalidEmailAuthNumException.class
+            InvalidEmailAuthNumException.class,
+            RequiredEmailAuthException.class
     })
     public ResponseEntity<ResponseWrapper> badRequest(Exception e) {
         log.error("Bad Request 발생 : ", e);
@@ -40,7 +41,8 @@ public class GlobalExceptionHandler {
     // 404
 
     @ExceptionHandler(value = {
-            UsernameNotFoundException.class
+            UsernameNotFoundException.class,
+            EmailAuthInfoNotFoundException.class
     })
     public ResponseEntity<ResponseWrapper> notFound(Exception e) {
         log.error("Not Found 발생 : ", e);
