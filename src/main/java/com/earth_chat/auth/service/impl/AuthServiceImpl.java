@@ -15,9 +15,7 @@ import com.earth_chat.auth.vo.RefreshTokenVo;
 import com.earth_chat.common.custom.CustomUserDetails;
 import com.earth_chat.common.enums.MailType;
 import com.earth_chat.common.enums.UserStatus;
-import com.earth_chat.common.exception.AlreadyExistsEmailException;
-import com.earth_chat.common.exception.AlreadyExistsNicknameException;
-import com.earth_chat.common.exception.InvalidEmailAuthNumException;
+import com.earth_chat.common.exception.*;
 import com.earth_chat.common.jwt.JwtTokenProvider;
 import com.earth_chat.common.util.AuthNumUtil;
 import com.earth_chat.user.service.UserService;
@@ -64,6 +62,13 @@ public class AuthServiceImpl implements AuthService {
             throw new AlreadyExistsNicknameException("이미 가입된 닉네임입니다.");
         }
 
+        EmailAuthInfoVo emailAuthInfo = emailAuthInfoService.selectEmailAuthInfoByEmail(registerRequest.getEmail())
+                .orElseThrow(() -> new EmailAuthInfoNotFoundException("이메일 인증 정보를 찾을 수 없습니다."));
+
+        if (!emailAuthInfo.getAuthYn().equals("Y")) {
+            throw new RequiredEmailAuthException("이메일 인증이 필요합니다.");
+        }
+
         List<RoleVo> roleList = userService.selectUserRoles();
 
         UserVo userVo = UserVo.builder()
@@ -74,8 +79,6 @@ public class AuthServiceImpl implements AuthService {
                 .userStatus(UserStatus.COMPLETED)
                 .roleList(roleList)
                 .build();
-
-        
 
         userService.insertUser(userVo);
         userService.insertUserRole(userVo);
