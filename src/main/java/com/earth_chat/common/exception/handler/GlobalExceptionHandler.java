@@ -21,7 +21,8 @@ public class GlobalExceptionHandler {
             AlreadyExistsNicknameException.class,
             FailSendingMailException.class,
             InvalidEmailAuthNumException.class,
-            RequiredEmailAuthException.class
+            RequiredEmailAuthException.class,
+            InvalidPasswordFindKeyException.class
     })
     public ResponseEntity<ResponseWrapper> badRequest(Exception e) {
         log.error("Bad Request 발생 : ", e);
