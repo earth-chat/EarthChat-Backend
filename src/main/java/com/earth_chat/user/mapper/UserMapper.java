@@ -57,4 +57,10 @@ public interface UserMapper {
      * @return int
      */
     int insertUserRole(UserVo userVo);
+
+    /**
+     * 사용자 정보 업데이트.
+     * @param userVo 사용자 정보
+     */
+    int updateUserInfo(UserVo userVo);
 }

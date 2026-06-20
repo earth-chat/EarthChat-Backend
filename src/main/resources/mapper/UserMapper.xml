@@ -28,7 +28,9 @@
             email,
             pwd,
             translate_code,
-            user_status
+            user_status,
+            reg_dt,
+            mod_dt
         )
         VALUES
         (
@@ -36,7 +38,9 @@
             #{email},
             #{pwd},
             #{translateCode},
-            #{userStatus}
+            #{userStatus},
+            NOW(),
+            NOW()
         )
     </insert>
 
@@ -53,6 +57,7 @@
             u.mod_dt
         FROM user_info u
         WHERE u.email = #{email}
+        AND u.use_yn = 'Y'
     </select>
 
     <select id="selectRolesByUserSeq" resultType="com.earth_chat.user.vo.RoleVo" parameterType="long">
@@ -81,4 +86,13 @@
             (#{userSeq}, #{role.roleSeq})
         </foreach>
     </insert>
+
+    <update id="updateUserInfo" parameterType="com.earth_chat.user.vo.UserVo">
+        UPDATE user_info
+        SET user_status = #{userStatus},
+            use_yn = #{useYn},
+            translate_code = #{translateCode},
+            mod_dt = NOW()
+        WHERE user_seq = #{userSeq}
+    </update>
 </mapper>
