@@ -7,12 +7,12 @@
 
     <insert id="insertRefreshToken" parameterType="com.earth_chat.auth.vo.RefreshTokenVo" keyColumn="token_seq" keyProperty="tokenSeq" useGeneratedKeys="true">
         INSERT INTO refresh_token_info(user_seq, token_value, expired_dt, use_yn, reg_dt, mod_dt)
-        VALUES (#{userSeq}, #{tokenValue}, #{expiredDt}, #{useYn}, #{regDt}, #{modDt})
+        VALUES (#{userSeq}, #{tokenValue}, #{expiredDt}, #{useYn}, NOW(), NOW())
         ON CONFLICT (user_seq)
         DO UPDATE
         SET token_value = #{tokenValue},
         expired_dt = #{expiredDt},
-        mod_dt = #{modDt}
+        mod_dt = NOW()
     </insert>
 
     <select id="selectRefreshTokenByUserSeq" parameterType="string" resultType="com.earth_chat.auth.vo.RefreshTokenVo">

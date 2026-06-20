@@ -22,7 +22,7 @@
             #{expiredDt},
             #{useYn},
             #{authYn},
-            #{regDt}
+            NOW()
         )
     </insert>
 
