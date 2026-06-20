@@ -119,7 +119,10 @@ public class AuthController {
             }, description = "성공 시 반환"),
             @ApiResponse(responseCode = "400", content = {
                     @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
-            }, description = "이메일 발송 실패 시 반환")
+            }, description = "이메일 발송 실패 시 반환"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "비밀번호 찾기 메일 발송 시 해당 사용자를 찾지 못했을 시 반환")
     })
     @PostMapping("/email")
     public ResponseEntity<ResponseWrapper> email(
@@ -144,7 +147,10 @@ public class AuthController {
             }, description = "성공 시 반환"),
             @ApiResponse(responseCode = "400", content = {
                     @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
-            }, description = "인증 코드가 만료되었거나 일치하지 않을 경우 발생")
+            }, description = "인증 코드가 만료되었거나 일치하지 않을 경우 발생"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "사용자 정보를 찾지 못했을 경우 발생")
     })
     @PostMapping("/email/authCode")
     public ResponseEntity<ResponseWrapper> validateEmailAuthCode(
