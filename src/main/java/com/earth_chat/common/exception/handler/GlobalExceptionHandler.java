@@ -22,7 +22,8 @@ public class GlobalExceptionHandler {
             FailSendingMailException.class,
             InvalidEmailAuthNumException.class,
             RequiredEmailAuthException.class,
-            InvalidPasswordFindKeyException.class
+            InvalidPasswordFindKeyException.class,
+            InvalidRefreshTokenException.class
     })
     public ResponseEntity<ResponseWrapper> badRequest(Exception e) {
         log.error("Bad Request 발생 : ", e);
@@ -43,7 +44,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {
             UsernameNotFoundException.class,
-            EmailAuthInfoNotFoundException.class
+            EmailAuthInfoNotFoundException.class,
+            RefreshTokenNotFoundException.class,
+            PasswordFindKeyNotFoundException.class
     })
     public ResponseEntity<ResponseWrapper> notFound(Exception e) {
         log.error("Not Found 발생 : ", e);
