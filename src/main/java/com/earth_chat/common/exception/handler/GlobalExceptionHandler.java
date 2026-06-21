@@ -59,6 +59,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseWrapper> internalServerError(Exception e) {
         log.error("Internal Server Error : ", e);
 
-        return ResponseWrapperUtil.fail(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseWrapperUtil.fail("서버에서 오류가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
