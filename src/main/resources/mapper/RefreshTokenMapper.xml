@@ -20,9 +20,23 @@
             r.token_seq,
             r.token_value,
             r.expired_dt,
-            r.use_yn
+            r.use_yn,
+            r.user_seq
         FROM refresh_token_info r
         WHERE r.user_seq = #{userSeq}
+        AND r.use_yn = 'Y'
+    </select>
+
+    <select id="selectRefreshTokenByTokenValue" parameterType="string" resultType="com.earth_chat.auth.vo.RefreshTokenVo">
+        SELECT
+            r.token_seq,
+            r.token_value,
+            r.expired_dt,
+            r.use_yn,
+            r.user_seq
+        FROM refresh_token_info r
+        WHERE r.token_value = #{tokenValue}
+        AND r.use_yn = 'Y'
     </select>
 
     <update id="updateRefreshToken" parameterType="com.earth_chat.auth.vo.RefreshTokenVo">
