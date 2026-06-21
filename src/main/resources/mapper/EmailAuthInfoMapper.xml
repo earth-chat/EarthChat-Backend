@@ -46,4 +46,13 @@
             mod_dt = NOW()
         WHERE mail_auth_seq = #{mailAuthSeq}
     </update>
+
+    <select id="existsAuthedInfoByEmail" parameterType="string" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM email_auth_info e
+            WHERE e.email = #{email}
+            AND e.auth_yn = 'Y'
+        )
+    </select>
 </mapper>
