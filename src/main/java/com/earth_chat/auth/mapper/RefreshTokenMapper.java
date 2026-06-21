@@ -21,6 +21,13 @@ public interface RefreshTokenMapper {
     RefreshTokenVo selectRefreshTokenByUserSeq(Long userSeq);
 
     /**
+     * Refresh Token 조회.
+     * @param refreshToken Refresh Token
+     * @return RefreshTokenVo
+     */
+    RefreshTokenVo selectRefreshTokenByTokenValue(String refreshToken);
+
+    /**
      * Refresh Token 정보 업데이트
      * @param refreshTokenVo Refresh Token
      * @return int
