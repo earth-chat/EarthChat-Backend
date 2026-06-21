@@ -11,13 +11,25 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class AsyncConfig {
 
-    @Bean
-    public Executor taskExecutor() {
+    @Bean("registerEmailTaskExecutor")
+    public Executor registerEmailTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(3);
         executor.setMaxPoolSize(3);
         executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("Async-");
+        executor.setThreadNamePrefix("Register-Email-Async-");
+        executor.initialize();
+
+        return executor;
+    }
+
+    @Bean("findPasswordEmailTaskExecutor")
+    public Executor findPasswordEmailTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(3);
+        executor.setMaxPoolSize(3);
+        executor.setQueueCapacity(500);
+        executor.setThreadNamePrefix("Find-Password-Async-");
         executor.initialize();
 
         return executor;
