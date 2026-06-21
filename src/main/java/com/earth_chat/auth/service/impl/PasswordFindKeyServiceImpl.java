@@ -38,5 +38,11 @@ public class PasswordFindKeyServiceImpl implements PasswordFindKeyService {
         return passwordFindKeyMapper.updatePasswordFindKey(passwordFindKeyVo);
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<PasswordFindKeyVo> selectPasswordFindKeyByKey(String key) {
+        return Optional.ofNullable(passwordFindKeyMapper.selectPasswordFindKeyByKey(key));
+    }
 }
