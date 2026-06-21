@@ -26,4 +26,11 @@ public interface PasswordFindKeyMapper {
      * @return int
      */
     int updatePasswordFindKey(PasswordFindKeyVo passwordFindKeyVo);
+
+    /**
+     * 비밀번호 찾기 키 조회.
+     * @param key 키갑
+     * @return 비밀번호 찾기 키
+     */
+    PasswordFindKeyVo selectPasswordFindKeyByKey(String key);
 }
