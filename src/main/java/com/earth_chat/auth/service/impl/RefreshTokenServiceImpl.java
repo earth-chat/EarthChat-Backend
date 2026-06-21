@@ -41,8 +41,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 .tokenValue(UUID.randomUUID().toString())
                 .expiredDt(now.plusSeconds(refreshTokenExpiredTime / 1000))
                 .useYn("Y")
-                .regDt(now)
-                .modDt(now)
                 .build();
 
         refreshTokenMapper.insertRefreshToken(refreshToken);
@@ -56,6 +54,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public Optional<RefreshTokenVo> selectRefreshTokenByUserSeq(Long userSeq) {
         return Optional.ofNullable(refreshTokenMapper.selectRefreshTokenByUserSeq(userSeq));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<RefreshTokenVo> selectRefreshTokenByTokenValue(String refreshToken) {
+        return Optional.ofNullable(refreshTokenMapper.selectRefreshTokenByTokenValue(refreshToken));
     }
 
     /**
