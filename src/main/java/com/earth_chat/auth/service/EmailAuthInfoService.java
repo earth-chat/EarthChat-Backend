@@ -25,4 +25,11 @@ public interface EmailAuthInfoService {
      * @param authInfo 인증 정보
      */
     int updateEmailAuthInfo(EmailAuthInfoVo authInfo);
+
+    /**
+     * 인증이 완료된 정보가 존재하는지 확인.
+     * @param email 이메일
+     * @return boolean
+     */
+    boolean existsAuthedInfoByEmail(String email);
 }

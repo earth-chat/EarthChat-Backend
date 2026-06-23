@@ -37,4 +37,12 @@ public class EmailAuthInfoServiceImpl implements EmailAuthInfoService {
     public int updateEmailAuthInfo(EmailAuthInfoVo authInfo) {
         return emailAuthInfoMapper.updateEmailAuthInfo(authInfo);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean existsAuthedInfoByEmail(String email) {
+        return emailAuthInfoMapper.existsAuthedInfoByEmail(email);
+    }
 }
