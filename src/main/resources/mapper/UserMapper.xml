@@ -60,6 +60,22 @@
         AND u.use_yn = 'Y'
     </select>
 
+    <select id="selectUserByUserSeq" resultType="com.earth_chat.user.vo.UserVo" parameterType="long">
+        SELECT
+            u.user_seq,
+            u.email,
+            u.nickname,
+            u.pwd,
+            u.use_yn,
+            u.translate_code,
+            u.user_status,
+            u.reg_dt,
+            u.mod_dt
+        FROM user_info u
+        WHERE u.user_seq = #{userSeq}
+        AND u.use_yn = 'Y'
+    </select>
+
     <select id="selectRolesByUserSeq" resultType="com.earth_chat.user.vo.RoleVo" parameterType="long">
         SELECT
             r.role_seq,
@@ -92,6 +108,13 @@
         SET user_status = #{userStatus},
             use_yn = #{useYn},
             translate_code = #{translateCode},
+            mod_dt = NOW()
+        WHERE user_seq = #{userSeq}
+    </update>
+
+    <update id="updateUserPassword" parameterType="com.earth_chat.user.vo.UserVo">
+        UPDATE user_info
+        SET pwd = #{pwd},
             mod_dt = NOW()
         WHERE user_seq = #{userSeq}
     </update>
