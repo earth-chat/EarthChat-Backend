@@ -2,49 +2,55 @@ package com.earth_chat.auth.service.impl;
 
 import com.earth_chat.auth.service.EmailService;
 import com.earth_chat.auth.vo.EmailAuthInfoVo;
-import com.earth_chat.common.exception.FailSendingMailException;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.earth_chat.auth.vo.PasswordFindKeyVo;
+import com.earth_chat.common.sender.EmailSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailServiceImpl implements EmailService {
 
-    private final JavaMailSender javaMailSender;
-    private final SpringTemplateEngine templateEngine;
+    private final EmailSender emailSender;
+
+    @Value("${find-password-page.url:#{null}}")
+    private String findPasswordUrl;
 
     /**
      * {@inheritDoc}
      */
-    @Async("taskExecutor")
+    @Async("registerEmailTaskExecutor")
     @Override
     public void sendAuthCodeMail(EmailAuthInfoVo emailAuthInfoVo) {
-        try {
-            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        Context context = new Context();
+        context.setVariable("authCode", emailAuthInfoVo.getAuthNum());
 
-            Context context = new Context();
-            context.setVariable("authCode", emailAuthInfoVo.getAuthNum());
-            String html = templateEngine.process("email/AuthCodeEmail", context);
+        String templatePath = "email/AuthCodeEmail";
+        String subject = "EarthChat - 회원가입을 위해 본인 인증을 완료해주세요";
 
-            helper.setTo(emailAuthInfoVo.getEmail());
-            helper.setSubject("EarthChat - 회원가입 인증번호를 확인해주세요");
-            helper.setText(html, true);
+        emailSender.sendMail(templatePath, context, emailAuthInfoVo.getEmail(), subject);
+    }
 
-            javaMailSender.send(mimeMessage);
-        } catch (MessagingException e) {
-            log.error("메일 발송 도중 MessagingException 발생 : ", e);
-        } catch (Exception e) {
-            log.error("메일 발송 도중 예외 발생 : ", e);
-        }
+    /**
+     * {@inheritDoc}
+     */
+    @Async("findPasswordEmailTaskExecutor")
+    @Override
+    public void sendPasswordFindKeyMail(PasswordFindKeyVo passwordFindKeyVo) {
+        Context context = new Context();
+        String pageUrl = findPasswordUrl + "?key=" + passwordFindKeyVo.getKeyValue();
+        log.debug("pageUrl: {}", pageUrl);
+
+        context.setVariable("findPasswordUrl", pageUrl);
+
+        String templatePath = "email/PasswordFindEmail";
+        String subject = "EarthChat - 비밀번호를 재설정하세요";
+
+        emailSender.sendMail(templatePath, context, passwordFindKeyVo.getEmail(), subject);
     }
 }
