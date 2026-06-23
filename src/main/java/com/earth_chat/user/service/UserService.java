@@ -37,6 +37,13 @@ public interface UserService {
     Optional<UserVo> selectUserByEmail(String email);
 
     /**
+     * 이메일을 통한 사용자 데이터 조회.
+     * @param userSeq 사용자 SEQ
+     * @return 사용자 데이터
+     */
+    Optional<UserVo> selectUserByUserSeq(Long userSeq);
+
+    /**
      * 사용자 역할 리스트 조회.
      * @param userSeq 사용자 SEQ
      * @return List<RoleVo>
@@ -55,4 +62,17 @@ public interface UserService {
      * @return int
      */
     int insertUserRole(UserVo userVo);
+
+    /**
+     * 사용자 비밀번호 업데이트.
+     * @param userVo 사용자 정보
+     * @return int
+     */
+    int updateUserPassword(UserVo userVo);
+
+    /**
+     * 사용자 정보 업데이트.
+     * @param userVo 사용자 정보
+     */
+    int updateUserInfo(UserVo userVo);
 }

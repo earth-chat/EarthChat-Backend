@@ -52,6 +52,14 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
+    public Optional<UserVo> selectUserByUserSeq(Long userSeq) {
+        return Optional.ofNullable(userMapper.selectUserByUserSeq(userSeq));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<RoleVo> selectRolesByUserSeq(Long userSeq) {
         return userMapper.selectRolesByUserSeq(userSeq);
     }
@@ -70,5 +78,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public int insertUserRole(UserVo userVo) {
         return userMapper.insertUserRole(userVo);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int updateUserPassword(UserVo userVo) {
+        return userMapper.updateUserPassword(userVo);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int updateUserInfo(UserVo userVo) {
+        return userMapper.updateUserInfo(userVo);
     }
 }
