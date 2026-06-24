@@ -1,9 +1,6 @@
 package com.earth_chat.auth.controller;
 
-import com.earth_chat.auth.controller.request.LoginRequest;
-import com.earth_chat.auth.controller.request.RegisterRequest;
-import com.earth_chat.auth.controller.request.SendMailRequest;
-import com.earth_chat.auth.controller.request.ValidateMailAuthCodeRequest;
+import com.earth_chat.auth.controller.request.*;
 import com.earth_chat.auth.service.AuthService;
 import com.earth_chat.common.custom.CustomUserDetails;
 import com.earth_chat.common.util.ResponseWrapper;
@@ -39,7 +36,7 @@ public class AuthController {
                     @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
             }, description = "성공 시 반환")
     })
-    @GetMapping("/existsEmail")
+    @GetMapping("/exists-email")
     public ResponseEntity<ResponseWrapper> existsEmail(
             @Parameter(required = true, description = "이메일")
             @RequestParam(required = true) String email
@@ -53,7 +50,7 @@ public class AuthController {
                     @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
             }, description = "성공 시 반환")
     })
-    @GetMapping("/existsNickname")
+    @GetMapping("/exists-nickname")
     public ResponseEntity<ResponseWrapper> existsNickname(
             @Parameter(required = true, description = "닉네임")
             @RequestParam(required = true) String nickname
@@ -152,7 +149,7 @@ public class AuthController {
                     @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
             }, description = "사용자 정보를 찾지 못했을 경우 발생")
     })
-    @PostMapping("/email/authCode")
+    @PostMapping("/email/auth-code")
     public ResponseEntity<ResponseWrapper> validateEmailAuthCode(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -167,6 +164,61 @@ public class AuthController {
         return ResponseWrapperUtil.success("success", authService.validateMailAuthCode(request));
     }
 
+    @Operation(summary = "비밀번호 초기화 API", description = "비밀번호 찾기에서 사용되는 비밀번호 초기화 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "400", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "키값이 만료되었을 경우 발생"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "사용자 혹은 키값을 찾지 못했을 경우 발생")
+    })
+    @PostMapping("/reset-password")
+    public ResponseEntity<ResponseWrapper> resetPassword(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "비밀번호 초기화 요청 객체",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PasswordResetRequest.class)
+                    )
+            )
+            @RequestBody PasswordResetRequest request
+    ) {
+        authService.resetPassword(request);
+        return ResponseWrapperUtil.success("success");
+    }
+
+    @Operation(summary = "토큰 재발급 API", description = "토큰 재발급 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "400", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "토큰이 만료되었을 경우 발생"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "사용자 혹은 토큰값을 찾지 못했을 경우 발생")
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<ResponseWrapper> refresh(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "토큰 재발급 요청 객체",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = TokenRefreshRequest.class)
+                    )
+            )
+            @RequestBody TokenRefreshRequest request
+    ) {
+        return ResponseWrapperUtil.success("success", authService.refresh(request));
+    }
+
     @Operation(summary = "로그아웃 API", description = "로그아웃 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {
@@ -176,7 +228,7 @@ public class AuthController {
                     @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
             }, description = "사용자를 찾지 못했을 경우 발생")
     })
-    @PreAuthorize("hasRole('ROLE_GUEST')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @SecurityRequirement(name="Jwt Auth")
     @PostMapping("/logout")
     public ResponseEntity<ResponseWrapper> logout(
