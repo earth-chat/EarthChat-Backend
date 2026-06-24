@@ -40,9 +40,11 @@ public class SecurityConfig {
                                     "/api/v1/auth/login",
                                     "/api/v1/auth/register",
                                     "/api/v1/auth/email",
-                                    "/api/v1/auth/email/authCode",
-                                    "/api/v1/auth/existsEmail",
-                                    "/api/v1/auth/existsNickname").permitAll()
+                                    "/api/v1/auth/email/auth-code",
+                                    "/api/v1/auth/exists-email",
+                                    "/api/v1/auth/exists-nickname",
+                                    "/api/v1/auth/reset-password",
+                                    "/api/v1/auth/refresh").permitAll()
                             .anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
