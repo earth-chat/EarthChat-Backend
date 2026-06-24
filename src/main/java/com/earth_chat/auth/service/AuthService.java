@@ -1,9 +1,6 @@
 package com.earth_chat.auth.service;
 
-import com.earth_chat.auth.controller.request.LoginRequest;
-import com.earth_chat.auth.controller.request.RegisterRequest;
-import com.earth_chat.auth.controller.request.SendMailRequest;
-import com.earth_chat.auth.controller.request.ValidateMailAuthCodeRequest;
+import com.earth_chat.auth.controller.request.*;
 import com.earth_chat.auth.controller.response.LoginResponse;
 import com.earth_chat.auth.controller.response.RegisterResponse;
 import com.earth_chat.common.custom.CustomUserDetails;
@@ -57,4 +54,17 @@ public interface AuthService {
      * @param customUserDetails 인증된 사용자 객체
      */
     void logout(CustomUserDetails customUserDetails);
+
+    /**
+     * 비밀번호 초기화. ( 비밀번호 찾기에서 사용. )
+     * @param request 비밀번호 초기화 요청 객체
+     */
+    void resetPassword(PasswordResetRequest request);
+
+    /**
+     * 토큰 재발급 처리.
+     * @param request 토큰 재발급 요청 객체
+     * @return LoginResponse
+     */
+    LoginResponse refresh(TokenRefreshRequest request);
 }

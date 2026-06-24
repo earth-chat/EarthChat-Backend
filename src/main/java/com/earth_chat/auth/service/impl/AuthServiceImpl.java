@@ -1,16 +1,11 @@
 package com.earth_chat.auth.service.impl;
 
-import com.earth_chat.auth.controller.request.LoginRequest;
-import com.earth_chat.auth.controller.request.RegisterRequest;
-import com.earth_chat.auth.controller.request.SendMailRequest;
-import com.earth_chat.auth.controller.request.ValidateMailAuthCodeRequest;
+import com.earth_chat.auth.controller.request.*;
 import com.earth_chat.auth.controller.response.LoginResponse;
 import com.earth_chat.auth.controller.response.RegisterResponse;
-import com.earth_chat.auth.service.AuthService;
-import com.earth_chat.auth.service.EmailAuthInfoService;
-import com.earth_chat.auth.service.EmailService;
-import com.earth_chat.auth.service.RefreshTokenService;
+import com.earth_chat.auth.service.*;
 import com.earth_chat.auth.vo.EmailAuthInfoVo;
+import com.earth_chat.auth.vo.PasswordFindKeyVo;
 import com.earth_chat.auth.vo.RefreshTokenVo;
 import com.earth_chat.common.custom.CustomUserDetails;
 import com.earth_chat.common.enums.MailType;
@@ -34,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     private final EmailService emailService;
     private final EmailAuthInfoService emailAuthInfoService;
+    private final PasswordFindKeyService passwordFindKeyService;
 
     /**
      * {@inheritDoc}
@@ -62,11 +59,8 @@ public class AuthServiceImpl implements AuthService {
             throw new AlreadyExistsNicknameException("이미 가입된 닉네임입니다.");
         }
 
-        EmailAuthInfoVo emailAuthInfo = emailAuthInfoService.selectEmailAuthInfoByEmail(registerRequest.getEmail())
-                .orElseThrow(() -> new EmailAuthInfoNotFoundException("이메일 인증 정보를 찾을 수 없습니다."));
-
-        if (!emailAuthInfo.getAuthYn().equals("Y")) {
-            throw new RequiredEmailAuthException("이메일 인증이 필요합니다.");
+        if (emailAuthInfoService.existsAuthedInfoByEmail(registerRequest.getEmail())) {
+            throw new EmailAuthInfoNotFoundException("이메일 인증이 필요합니다.");
         }
 
         List<RoleVo> roleList = userService.selectUserRoles();
@@ -88,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
                 .nickname(userVo.getNickname())
                 .email(userVo.getEmail())
                 .userStatus(userVo.getUserStatus())
+                .translateCode(userVo.getTranslateCode())
                 .build();
     }
 
@@ -149,25 +144,52 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void sendMail(SendMailRequest request) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expiredDt = now.plusMinutes(3);
 
-        EmailAuthInfoVo emailAuthInfoVo = EmailAuthInfoVo.builder()
-                .authNum(AuthNumUtil.generateAuthNum(6))
-                .email(request.getEmail())
-                .useYn("Y")
-                .authYn("N")
-                .expiredDt(expiredDt)
-                .regDt(now)
-                .build();
+        switch (request.getType()) {
+            case REGISTER -> {
+                LocalDateTime expiredDt = now.plusMinutes(3);
 
-        emailAuthInfoService.selectEmailAuthInfoByEmail(emailAuthInfoVo.getEmail())
-                .ifPresent(authInfo -> {
-                    authInfo.setUseYn("N");
-                    emailAuthInfoService.updateEmailAuthInfo(authInfo);
-                });
+                EmailAuthInfoVo emailAuthInfoVo = EmailAuthInfoVo.builder()
+                        .authNum(AuthNumUtil.generateAuthNum(6))
+                        .email(request.getEmail())
+                        .useYn("Y")
+                        .authYn("N")
+                        .expiredDt(expiredDt)
+                        .build();
 
-        emailAuthInfoService.insertEmailAuthInfo(emailAuthInfoVo);
-        emailService.sendAuthCodeMail(emailAuthInfoVo);
+                emailAuthInfoService.selectEmailAuthInfoByEmail(emailAuthInfoVo.getEmail())
+                        .ifPresent(authInfo -> {
+                            authInfo.setUseYn("N");
+                            emailAuthInfoService.updateEmailAuthInfo(authInfo);
+                        });
+
+                emailAuthInfoService.insertEmailAuthInfo(emailAuthInfoVo);
+                emailService.sendAuthCodeMail(emailAuthInfoVo);
+            }
+
+            case PASSWORD -> {
+                userService.selectUserByEmail(request.getEmail())
+                        .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
+
+                LocalDateTime expiredDt = now.plusMinutes(10);
+
+                PasswordFindKeyVo passwordFindKeyVo = PasswordFindKeyVo.builder()
+                        .email(request.getEmail())
+                        .keyValue(UUID.randomUUID().toString())
+                        .useYn("Y")
+                        .expiredDt(expiredDt)
+                        .build();
+
+                passwordFindKeyService.selectPasswordFindKeyByEmail(passwordFindKeyVo.getEmail())
+                                .ifPresent(passwordFindKey -> {
+                                    passwordFindKey.setUseYn("N");
+                                    passwordFindKeyService.updatePasswordFindKey(passwordFindKey);
+                                });
+
+                passwordFindKeyService.insertPasswordFindKey(passwordFindKeyVo);
+                emailService.sendPasswordFindKeyMail(passwordFindKeyVo);
+            }
+        }
     }
 
     @Override
@@ -179,12 +201,9 @@ public class AuthServiceImpl implements AuthService {
 
         switch (type) {
             case REGISTER -> {
+
                 EmailAuthInfoVo authInfo = emailAuthInfoService.selectEmailAuthInfoByEmail(email)
                         .orElseThrow(() -> new InvalidEmailAuthNumException("잘못된 인증코드입니다."));
-
-                if (authInfo.getUseYn().equals("N")) {
-                    throw new InvalidEmailAuthNumException("사용할 수 없는 인증 코드입니다.");
-                }
 
                 if (authInfo.getExpiredDt().isBefore(LocalDateTime.now())) {
                     authInfo.setUseYn("N");
@@ -197,14 +216,29 @@ public class AuthServiceImpl implements AuthService {
                 }
 
                 authInfo.setUseYn("N");
-                authInfo.setAuthYn("Y");
                 emailAuthInfoService.updateEmailAuthInfo(authInfo);
 
                 result.put("isValid", true);
             }
 
             case PASSWORD -> {
-                // TODO: 구현 예정
+                userService.selectUserByEmail(email)
+                        .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
+
+                PasswordFindKeyVo passwordFindKeyVo = passwordFindKeyService.selectPasswordFindKeyByEmail(email)
+                        .orElseThrow(() -> new InvalidPasswordFindKeyException("잘못된 키값입니다."));
+
+                if (passwordFindKeyVo.getExpiredDt().isBefore(LocalDateTime.now())) {
+                    passwordFindKeyVo.setUseYn("N");
+                    passwordFindKeyService.updatePasswordFindKey(passwordFindKeyVo);
+                    throw new InvalidPasswordFindKeyException("만료된 키값입니다.");
+                }
+
+                if (!passwordFindKeyVo.getKeyValue().equals(authNum)) {
+                    throw new InvalidPasswordFindKeyException("일치하지 않는 키값입니다.");
+                }
+
+                result.put("isValid", true);
             }
         }
 
@@ -221,6 +255,65 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 
         refreshTokenService.deleteRefreshTokenByUserSeq(user.getUserSeq());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void resetPassword(PasswordResetRequest request) {
+        PasswordFindKeyVo passwordFindKey = passwordFindKeyService.selectPasswordFindKeyByKey(request.getKey())
+                .orElseThrow(() -> new PasswordFindKeyNotFoundException("일치하는 키를 찾을 수 없습니다."));
+
+        if (passwordFindKey.getExpiredDt().isBefore(LocalDateTime.now())) {
+            passwordFindKey.setUseYn("N");
+            passwordFindKeyService.updatePasswordFindKey(passwordFindKey);
+            throw new InvalidPasswordFindKeyException("만료된 키입니다.");
+        }
+
+        UserVo user = userService.selectUserByEmail(passwordFindKey.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("등록되지 않은 사용자입니다."));
+
+        user.setPwd(passwordEncoder.encode(request.getPassword()));
+        userService.updateUserPassword(user);
+
+        passwordFindKey.setUseYn("N");
+        passwordFindKeyService.updatePasswordFindKey(passwordFindKey);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LoginResponse refresh(TokenRefreshRequest request) {
+        String refreshToken = request.getToken();
+
+        RefreshTokenVo refreshTokenVo = refreshTokenService.selectRefreshTokenByTokenValue(refreshToken)
+                .orElseThrow(() -> new RefreshTokenNotFoundException("토큰을 찾을 수 없습니다."));
+
+        if (refreshTokenVo.getExpiredDt().isBefore(LocalDateTime.now())) {
+            refreshTokenVo.setUseYn("N");
+            refreshTokenService.updateRefreshToken(refreshTokenVo);
+            throw new InvalidRefreshTokenException("토큰이 만료되었습니다.");
+        }
+
+        UserVo user = userService.selectUserByUserSeq(refreshTokenVo.getUserSeq())
+                .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
+
+        List<RoleVo> roleList = userService.selectRolesByUserSeq(user.getUserSeq());
+        user.setRoleList(roleList);
+
+        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+
+        String accessToken = jwtTokenProvider.createToken(customUserDetails);
+
+        return LoginResponse.builder()
+                .userSeq(user.getUserSeq())
+                .nickname(user.getNickname())
+                .translateCode(user.getTranslateCode())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
 }
