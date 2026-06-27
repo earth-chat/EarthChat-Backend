@@ -9,6 +9,7 @@ CREATE SEQUENCE seq_guest_info START WITH 1;
 CREATE SEQUENCE seq_refresh_token_info START WITH 1;
 CREATE SEQUENCE seq_chat_history START WITH 1;
 CREATE SEQUENCE seq_translate_history START WITH 1;
+CREATE SEQUENCE seq_password_find_key START WITH 1;
 
 
 -- ==========================================
@@ -48,7 +49,8 @@ CREATE TABLE user_info (
     mod_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
     CONSTRAINT pk_user_info PRIMARY KEY (user_seq),
-    CONSTRAINT uk_user_email UNIQUE (email)
+    CONSTRAINT uk_user_email UNIQUE (email),
+    CONSTRAINT uk_user_nickname UNIQUE (nickname)
 );
 
 COMMENT ON TABLE user_info IS '사용자정보';
@@ -70,8 +72,11 @@ CREATE TABLE email_auth_info (
     mail_auth_seq BIGINT DEFAULT nextval('seq_email_auth_info'),
     email VARCHAR(150) NOT NULL,
     auth_num CHAR(6) NOT NULL,
+    auth_yn CHAR(1) DEFAULT 'N',
+    use_yn CHAR(1) DEFAULT 'N',
     expired_dt TIMESTAMP NOT NULL,
     reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    mod_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT pk_email_auth_info PRIMARY KEY (mail_auth_seq)
 );
@@ -79,9 +84,12 @@ CREATE TABLE email_auth_info (
 COMMENT ON TABLE email_auth_info IS '이메일인증정보';
 COMMENT ON COLUMN email_auth_info.mail_auth_seq IS '이메일인증SEQ';
 COMMENT ON COLUMN email_auth_info.email IS '이메일';
+COMMENT ON COLUMN email_auth_info.auth_yn IS '인증여부';
+COMMENT ON COLUMN email_auth_info.use_yn IS '사용여부';
 COMMENT ON COLUMN email_auth_info.auth_num IS '인증번호';
 COMMENT ON COLUMN email_auth_info.expired_dt IS '만료일시';
 COMMENT ON COLUMN email_auth_info.reg_dt IS '등록일시';
+COMMENT ON COLUMN email_auth_info.mod_dt IS '수정일시';
 
 
 -- ==========================================
@@ -164,16 +172,16 @@ COMMENT ON COLUMN guest_info.reg_dt IS '등록일시';
 -- ==========================================
 CREATE TABLE user_role (
     user_seq BIGINT NOT NULL,
-    role_id INT NOT NULL,
+    role_seq INT NOT NULL,
 
-    CONSTRAINT pk_user_role PRIMARY KEY (user_seq, role_id),
+    CONSTRAINT pk_user_role PRIMARY KEY (user_seq, role_seq),
     CONSTRAINT fk_user_role_user FOREIGN KEY (user_seq) REFERENCES user_info(user_seq),
-    CONSTRAINT fk_user_role_role FOREIGN KEY (role_id) REFERENCES role_info(role_seq)
+    CONSTRAINT fk_user_role_role FOREIGN KEY (role_seq) REFERENCES role_info(role_seq)
 );
 
 COMMENT ON TABLE user_role IS '사용자역할매핑';
 COMMENT ON COLUMN user_role.user_seq IS '사용자SEQ';
-COMMENT ON COLUMN user_role.role_id IS '역할SEQ';
+COMMENT ON COLUMN user_role.role_seq IS '역할SEQ';
 
 
 -- ==========================================
@@ -203,8 +211,10 @@ CREATE TABLE refresh_token_info (
     expired_dt TIMESTAMP NOT NULL,
     use_yn CHAR(1) DEFAULT 'Y',
     reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    mod_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
     CONSTRAINT pk_refresh_token_info PRIMARY KEY (token_seq),
+    CONSTRAINT uk_refresh_token_user_seq UNIQUE (user_seq),
     CONSTRAINT fk_refresh_token_user FOREIGN KEY (user_seq) REFERENCES user_info(user_seq)
 );
 
@@ -215,6 +225,7 @@ COMMENT ON COLUMN refresh_token_info.token_value IS '리프레시토큰값';
 COMMENT ON COLUMN refresh_token_info.expired_dt IS '만료일시';
 COMMENT ON COLUMN refresh_token_info.use_yn IS '사용여부';
 COMMENT ON COLUMN refresh_token_info.reg_dt IS '등록일시';
+COMMENT ON COLUMN refresh_token_info.mod_dt IS '수정일시';
 
 
 -- ==========================================
@@ -283,3 +294,28 @@ COMMENT ON COLUMN translate_history.chat_history_seq IS '채팅이력SEQ';
 COMMENT ON COLUMN translate_history.translate_code IS '번역코드';
 COMMENT ON COLUMN translate_history.message IS '번역메시지';
 COMMENT ON COLUMN translate_history.reg_dt IS '등록일시';
+
+-- ==========================================
+-- 13. 비밀번호 찾기 키
+-- ==========================================
+
+CREATE TABLE password_find_key (
+    key_seq BIGINT DEFAULT nextval('seq_password_find_key'),
+    email VARCHAR(150) NOT NULL,
+    key_value CHAR(36) NOT NULL,
+    use_yn CHAR(1) DEFAULT 'N',
+    expired_dt TIMESTAMP NOT NULL,
+    reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    mod_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_password_find_key PRIMARY KEY (key_seq)
+);
+
+COMMENT ON TABLE password_find_key IS '비밀번호찾기키';
+COMMENT ON COLUMN password_find_key.key_seq IS '키SEQ';
+COMMENT ON COLUMN password_find_key.email IS '이메일';
+COMMENT ON COLUMN password_find_key.use_yn IS '사용여부';
+COMMENT ON COLUMN password_find_key.key_value IS '키값';
+COMMENT ON COLUMN password_find_key.expired_dt IS '만료일시';
+COMMENT ON COLUMN password_find_key.reg_dt IS '등록일시';
+COMMENT ON COLUMN password_find_key.mod_dt IS '수정일시';
