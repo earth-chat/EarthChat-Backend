@@ -24,6 +24,14 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     private final ObjectMapper objectMapper;
     private final MessageUtil messageUtil;
 
+    /**
+     * 클라이언트에게 인증 요청 처리.
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @param authException AuthenticationException
+     * @throws IOException IOException
+     * @throws ServletException ServletException
+     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         log.error("Unauthenticated Request : ", authException);

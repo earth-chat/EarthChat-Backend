@@ -19,6 +19,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserService userService;
     private final MessageUtil messageUtil;
 
+    /**
+     * 사용자 정보 조회.
+     * @param username 사용자 ID
+     * @return UserDetails
+     * @throws UsernameNotFoundException 사용자를 찾지 못했을 경우 발생
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserVo userVo = userService.selectUserByEmail(username)

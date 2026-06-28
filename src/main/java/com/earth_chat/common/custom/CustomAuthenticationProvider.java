@@ -20,6 +20,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     private final CustomUserDetailsService customUserDetailsService;
     private final MessageUtil messageUtil;
 
+    /**
+     * 인증 처리.
+     * @param authentication 인증되지 않은 Authentication 객체
+     * @return 인증된 Authentication 객체
+     * @throws AuthenticationException 인증 실패 시 발생
+     */
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName();
@@ -37,6 +43,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, authentication, userDetails.getAuthorities());
     }
 
+    /**
+     * 대응 타입 구분.
+     * @param authentication Class
+     * @return boolean
+     */
     @Override
     public boolean supports(Class<?> authentication) {
         return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
