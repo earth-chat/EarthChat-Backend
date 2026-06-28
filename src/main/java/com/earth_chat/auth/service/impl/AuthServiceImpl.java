@@ -13,6 +13,7 @@ import com.earth_chat.common.enums.UserStatus;
 import com.earth_chat.common.exception.*;
 import com.earth_chat.common.jwt.JwtTokenProvider;
 import com.earth_chat.common.util.AuthNumUtil;
+import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.user.service.UserService;
 import com.earth_chat.user.vo.RoleVo;
 import com.earth_chat.user.vo.UserVo;
@@ -43,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final EmailAuthInfoService emailAuthInfoService;
     private final PasswordFindKeyService passwordFindKeyService;
+    private final MessageUtil messageUtil;
 
     /**
      * {@inheritDoc}
@@ -52,15 +54,15 @@ public class AuthServiceImpl implements AuthService {
     public RegisterResponse register(RegisterRequest registerRequest) {
 
         if (userService.existsEmail(registerRequest.getEmail())) {
-            throw new AlreadyExistsEmailException("이미 가입된 이메일입니다.");
+            throw new AlreadyExistsEmailException(messageUtil.getMessage("user.duplicate-email"));
         }
 
         if (userService.existsNickname(registerRequest.getNickname())) {
-            throw new AlreadyExistsNicknameException("이미 가입된 닉네임입니다.");
+            throw new AlreadyExistsNicknameException(messageUtil.getMessage("user.duplicate-nickname"));
         }
 
         if (emailAuthInfoService.existsAuthedInfoByEmail(registerRequest.getEmail())) {
-            throw new EmailAuthInfoNotFoundException("이메일 인증이 필요합니다.");
+            throw new EmailAuthInfoNotFoundException(messageUtil.getMessage("user.require-email-auth"));
         }
 
         List<RoleVo> roleList = userService.selectUserRoles();
@@ -93,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
         UserVo userVo = userService.selectUserByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
@@ -169,7 +171,7 @@ public class AuthServiceImpl implements AuthService {
 
             case PASSWORD -> {
                 userService.selectUserByEmail(request.getEmail())
-                        .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
+                        .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
 
                 LocalDateTime expiredDt = now.plusMinutes(10);
 
@@ -192,6 +194,9 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Map<String, Object> validateMailAuthCode(ValidateMailAuthCodeRequest request) {
         MailType type = request.getType();
@@ -203,16 +208,16 @@ public class AuthServiceImpl implements AuthService {
             case REGISTER -> {
 
                 EmailAuthInfoVo authInfo = emailAuthInfoService.selectEmailAuthInfoByEmail(email)
-                        .orElseThrow(() -> new InvalidEmailAuthNumException("잘못된 인증코드입니다."));
+                        .orElseThrow(() -> new InvalidEmailAuthNumException(messageUtil.getMessage("auth-code.invalid")));
 
                 if (authInfo.getExpiredDt().isBefore(LocalDateTime.now())) {
                     authInfo.setUseYn("N");
                     emailAuthInfoService.updateEmailAuthInfo(authInfo);
-                    throw new InvalidEmailAuthNumException("만료된 인증 코드입니다.");
+                    throw new InvalidEmailAuthNumException(messageUtil.getMessage("auth-code.expired"));
                 }
 
                 if (!authInfo.getAuthNum().equals(authNum)) {
-                    throw new InvalidEmailAuthNumException("인증 코드가 일치하지 않습니다.");
+                    throw new InvalidEmailAuthNumException(messageUtil.getMessage("auth-code.invalid"));
                 }
 
                 authInfo.setUseYn("N");
@@ -223,19 +228,19 @@ public class AuthServiceImpl implements AuthService {
 
             case PASSWORD -> {
                 userService.selectUserByEmail(email)
-                        .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
+                        .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
 
                 PasswordFindKeyVo passwordFindKeyVo = passwordFindKeyService.selectPasswordFindKeyByEmail(email)
-                        .orElseThrow(() -> new InvalidPasswordFindKeyException("잘못된 키값입니다."));
+                        .orElseThrow(() -> new InvalidPasswordFindKeyException(messageUtil.getMessage("password-key.invalid")));
 
                 if (passwordFindKeyVo.getExpiredDt().isBefore(LocalDateTime.now())) {
                     passwordFindKeyVo.setUseYn("N");
                     passwordFindKeyService.updatePasswordFindKey(passwordFindKeyVo);
-                    throw new InvalidPasswordFindKeyException("만료된 키값입니다.");
+                    throw new InvalidPasswordFindKeyException(messageUtil.getMessage("password-key.expired"));
                 }
 
                 if (!passwordFindKeyVo.getKeyValue().equals(authNum)) {
-                    throw new InvalidPasswordFindKeyException("일치하지 않는 키값입니다.");
+                    throw new InvalidPasswordFindKeyException(messageUtil.getMessage("password-key.invalid"));
                 }
 
                 result.put("isValid", true);
@@ -252,7 +257,7 @@ public class AuthServiceImpl implements AuthService {
     public void logout(CustomUserDetails customUserDetails) {
         String email = customUserDetails.getUsername();
         UserVo user = userService.selectUserByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
 
         refreshTokenService.deleteRefreshTokenByUserSeq(user.getUserSeq());
     }
@@ -263,16 +268,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void resetPassword(PasswordResetRequest request) {
         PasswordFindKeyVo passwordFindKey = passwordFindKeyService.selectPasswordFindKeyByKey(request.getKey())
-                .orElseThrow(() -> new PasswordFindKeyNotFoundException("일치하는 키를 찾을 수 없습니다."));
+                .orElseThrow(() -> new PasswordFindKeyNotFoundException(messageUtil.getMessage("password-key.invalid")));
 
         if (passwordFindKey.getExpiredDt().isBefore(LocalDateTime.now())) {
             passwordFindKey.setUseYn("N");
             passwordFindKeyService.updatePasswordFindKey(passwordFindKey);
-            throw new InvalidPasswordFindKeyException("만료된 키입니다.");
+            throw new InvalidPasswordFindKeyException(messageUtil.getMessage("password-key.expired"));
         }
 
         UserVo user = userService.selectUserByEmail(passwordFindKey.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("등록되지 않은 사용자입니다."));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
 
         user.setPwd(passwordEncoder.encode(request.getPassword()));
         userService.updateUserPassword(user);
@@ -289,16 +294,16 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = request.getToken();
 
         RefreshTokenVo refreshTokenVo = refreshTokenService.selectRefreshTokenByTokenValue(refreshToken)
-                .orElseThrow(() -> new RefreshTokenNotFoundException("토큰을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RefreshTokenNotFoundException(messageUtil.getMessage("refresh-token.not-found")));
 
         if (refreshTokenVo.getExpiredDt().isBefore(LocalDateTime.now())) {
             refreshTokenVo.setUseYn("N");
             refreshTokenService.updateRefreshToken(refreshTokenVo);
-            throw new InvalidRefreshTokenException("토큰이 만료되었습니다.");
+            throw new InvalidRefreshTokenException(messageUtil.getMessage("refresh-token.expired"));
         }
 
         UserVo user = userService.selectUserByUserSeq(refreshTokenVo.getUserSeq())
-                .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
 
         List<RoleVo> roleList = userService.selectRolesByUserSeq(user.getUserSeq());
         user.setRoleList(roleList);

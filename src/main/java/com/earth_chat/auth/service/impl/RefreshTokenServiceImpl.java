@@ -4,6 +4,7 @@ import com.earth_chat.auth.mapper.RefreshTokenMapper;
 import com.earth_chat.auth.service.RefreshTokenService;
 import com.earth_chat.auth.vo.RefreshTokenVo;
 import com.earth_chat.common.custom.CustomUserDetails;
+import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.user.service.UserService;
 import com.earth_chat.user.vo.UserVo;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenMapper refreshTokenMapper;
     private final UserService userService;
+    private final MessageUtil messageUtil;
 
     @Value("${refresh-token.expired.time}")
     private long refreshTokenExpiredTime;
@@ -32,7 +34,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshTokenVo createToken(CustomUserDetails customUserDetails) {
 
         UserVo userVo = userService.selectUserByEmail(customUserDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
 
         LocalDateTime now = LocalDateTime.now();
 

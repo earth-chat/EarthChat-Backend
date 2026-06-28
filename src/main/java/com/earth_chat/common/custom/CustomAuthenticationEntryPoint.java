@@ -1,5 +1,6 @@
 package com.earth_chat.common.custom;
 
+import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.common.util.ResponseWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -21,6 +22,7 @@ import java.io.IOException;
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
+    private final MessageUtil messageUtil;
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
@@ -28,7 +30,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         ResponseWrapper responseWrapper = ResponseWrapper.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .message("인증되지 않은 사용자입니다.")
+                .message(messageUtil.getMessage("auth.unauthorized"))
                 .result(null)
                 .build();
 

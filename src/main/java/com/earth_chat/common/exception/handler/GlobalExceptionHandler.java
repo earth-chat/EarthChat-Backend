@@ -1,8 +1,10 @@
 package com.earth_chat.common.exception.handler;
 
 import com.earth_chat.common.exception.*;
+import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.common.util.ResponseWrapper;
 import com.earth_chat.common.util.ResponseWrapperUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,9 +13,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 @Slf4j
 public class GlobalExceptionHandler {
-    
+
+    private final MessageUtil messageUtil;
+
     // 400
     
     @ExceptionHandler(value = {
@@ -62,6 +67,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseWrapper> internalServerError(Exception e) {
         log.error("Internal Server Error : ", e);
 
-        return ResponseWrapperUtil.fail("서버에서 오류가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseWrapperUtil.fail(messageUtil.getMessage("server.internal-server-error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

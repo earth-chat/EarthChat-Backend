@@ -1,6 +1,7 @@
 package com.earth_chat.common.jwt;
 
 import com.earth_chat.common.custom.CustomUserDetails;
+import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.user.service.UserService;
 import com.earth_chat.user.vo.RoleVo;
 import com.earth_chat.user.vo.UserVo;
@@ -27,6 +28,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final MessageUtil messageUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -44,7 +46,7 @@ public class JwtFilter extends OncePerRequestFilter {
             List<SimpleGrantedAuthority> auth = jwtTokenProvider.getAuthorities(claims);
 
             UserVo user = userService.selectUserByEmail(claims.getSubject())
-                    .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
+                    .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
             List<RoleVo> roleList = userService.selectRolesByUserSeq(user.getUserSeq());
             user.setRoleList(roleList);
 

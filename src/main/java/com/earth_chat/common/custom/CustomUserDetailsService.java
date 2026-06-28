@@ -1,5 +1,6 @@
 package com.earth_chat.common.custom;
 
+import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.user.service.UserService;
 import com.earth_chat.user.vo.RoleVo;
 import com.earth_chat.user.vo.UserVo;
@@ -16,11 +17,12 @@ import java.util.List;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserService userService;
+    private final MessageUtil messageUtil;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserVo userVo = userService.selectUserByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("가입되지 않은 사용자입니다."));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
 
         List<RoleVo> roleList = userService.selectRolesByUserSeq(userVo.getUserSeq());
         userVo.setRoleList(roleList);
