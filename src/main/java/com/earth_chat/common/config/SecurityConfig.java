@@ -27,6 +27,12 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
+    /**
+     * SecurityFilterChain Bean 등록.
+     * @param http HttpSecurity
+     * @return SecurityFilterChain
+     * @throws Exception Exception
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -57,6 +63,12 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * AuthenticationManager Bean 등록.
+     * @param http HttpSecurity
+     * @return AuthenticationManager
+     * @throws Exception Exception
+     */
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);

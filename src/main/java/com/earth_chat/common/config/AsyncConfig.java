@@ -11,6 +11,10 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class AsyncConfig {
 
+    /**
+     * 인증 코드 메일 발송 비동기 처리를 위한 Executor Bean 등록.
+     * @return Executor
+     */
     @Bean("registerEmailTaskExecutor")
     public Executor registerEmailTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -23,6 +27,10 @@ public class AsyncConfig {
         return executor;
     }
 
+    /**
+     * 비밀번호 메일 발송 비동기 처리를 위한 Executor Bean 등록.
+     * @return Executor
+     */
     @Bean("findPasswordEmailTaskExecutor")
     public Executor findPasswordEmailTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

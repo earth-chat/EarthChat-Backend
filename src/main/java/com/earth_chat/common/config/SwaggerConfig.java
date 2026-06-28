@@ -17,6 +17,10 @@ import org.springframework.context.annotation.Configuration;
 )
 public class SwaggerConfig {
 
+    /**
+     * Swagger UI 구성.
+     * @return OpenAPI
+     */
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
@@ -24,6 +28,10 @@ public class SwaggerConfig {
                 .info(info());
     }
 
+    /**
+     * Swagger UI 구성.
+     * @return Info
+     */
     public Info info() {
         return new Info()
                 .title("Earth Chat 백엔드 API")

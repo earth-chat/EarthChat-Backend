@@ -7,6 +7,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ObjectMapperConfig {
 
+    /**
+     * ObjectMapper Bean 등록.
+     * @return ObjectMapper
+     */
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
