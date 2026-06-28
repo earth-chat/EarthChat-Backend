@@ -18,7 +18,7 @@ public enum MessageCode {
     AUTH_CODE_INVALID("auth-code.invalid"),
     AUTH_CODE_EXPIRED("auth-code.expired"),
 
-    // 비밀번호 찾ㄱ기 키 관련 Message Code
+    // 비밀번호 찾기 키 관련 Message Code
     PASSWORD_KEY_INVALID("password-key.invalid"),
     PASSWORD_KEY_EXPIRED("password-key.expired"),
 
