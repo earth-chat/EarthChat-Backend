@@ -1,5 +1,6 @@
 package com.earth_chat.common.custom;
 
+import com.earth_chat.common.enums.MessageCode;
 import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.common.util.ResponseWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +39,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         ResponseWrapper responseWrapper = ResponseWrapper.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .message(messageUtil.getMessage("auth.unauthorized"))
+                .message(messageUtil.getMessage(MessageCode.AUTH_UNAUTHORIZED.getCode()))
                 .result(null)
                 .build();
 

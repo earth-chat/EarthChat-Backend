@@ -1,6 +1,7 @@
 package com.earth_chat.common.jwt;
 
 import com.earth_chat.common.custom.CustomUserDetails;
+import com.earth_chat.common.enums.MessageCode;
 import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.user.service.UserService;
 import com.earth_chat.user.vo.RoleVo;
@@ -46,7 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
             List<SimpleGrantedAuthority> auth = jwtTokenProvider.getAuthorities(claims);
 
             UserVo user = userService.selectUserByEmail(claims.getSubject())
-                    .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
+                    .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
             List<RoleVo> roleList = userService.selectRolesByUserSeq(user.getUserSeq());
             user.setRoleList(roleList);
 

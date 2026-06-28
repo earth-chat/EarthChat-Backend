@@ -4,6 +4,7 @@ import com.earth_chat.auth.mapper.RefreshTokenMapper;
 import com.earth_chat.auth.service.RefreshTokenService;
 import com.earth_chat.auth.vo.RefreshTokenVo;
 import com.earth_chat.common.custom.CustomUserDetails;
+import com.earth_chat.common.enums.MessageCode;
 import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.user.service.UserService;
 import com.earth_chat.user.vo.UserVo;
@@ -34,7 +35,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshTokenVo createToken(CustomUserDetails customUserDetails) {
 
         UserVo userVo = userService.selectUserByEmail(customUserDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
 
         LocalDateTime now = LocalDateTime.now();
 

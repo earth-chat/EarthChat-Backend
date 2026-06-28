@@ -1,5 +1,6 @@
 package com.earth_chat.common.custom;
 
+import com.earth_chat.common.enums.MessageCode;
 import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.user.service.UserService;
 import com.earth_chat.user.vo.RoleVo;
@@ -28,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserVo userVo = userService.selectUserByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
 
         List<RoleVo> roleList = userService.selectRolesByUserSeq(userVo.getUserSeq());
         userVo.setRoleList(roleList);

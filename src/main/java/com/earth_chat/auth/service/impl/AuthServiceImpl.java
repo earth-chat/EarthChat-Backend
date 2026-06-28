@@ -9,6 +9,7 @@ import com.earth_chat.auth.vo.PasswordFindKeyVo;
 import com.earth_chat.auth.vo.RefreshTokenVo;
 import com.earth_chat.common.custom.CustomUserDetails;
 import com.earth_chat.common.enums.MailType;
+import com.earth_chat.common.enums.MessageCode;
 import com.earth_chat.common.enums.UserStatus;
 import com.earth_chat.common.exception.*;
 import com.earth_chat.common.jwt.JwtTokenProvider;
@@ -54,15 +55,15 @@ public class AuthServiceImpl implements AuthService {
     public RegisterResponse register(RegisterRequest registerRequest) {
 
         if (userService.existsEmail(registerRequest.getEmail())) {
-            throw new AlreadyExistsEmailException(messageUtil.getMessage("user.duplicate-email"));
+            throw new AlreadyExistsEmailException(messageUtil.getMessage(MessageCode.USER_DUPLICATE_EMAIL.getCode()));
         }
 
         if (userService.existsNickname(registerRequest.getNickname())) {
-            throw new AlreadyExistsNicknameException(messageUtil.getMessage("user.duplicate-nickname"));
+            throw new AlreadyExistsNicknameException(messageUtil.getMessage(MessageCode.USER_DUPLICATE_NICKNAME.getCode()));
         }
 
         if (emailAuthInfoService.existsAuthedInfoByEmail(registerRequest.getEmail())) {
-            throw new EmailAuthInfoNotFoundException(messageUtil.getMessage("user.require-email-auth"));
+            throw new EmailAuthInfoNotFoundException(messageUtil.getMessage(MessageCode.USER_REQUIRED_EMAIL_AUTH.getCode()));
         }
 
         List<RoleVo> roleList = userService.selectUserRoles();
@@ -95,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
         UserVo userVo = userService.selectUserByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
@@ -171,7 +172,7 @@ public class AuthServiceImpl implements AuthService {
 
             case PASSWORD -> {
                 userService.selectUserByEmail(request.getEmail())
-                        .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
+                        .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
 
                 LocalDateTime expiredDt = now.plusMinutes(10);
 
@@ -208,16 +209,16 @@ public class AuthServiceImpl implements AuthService {
             case REGISTER -> {
 
                 EmailAuthInfoVo authInfo = emailAuthInfoService.selectEmailAuthInfoByEmail(email)
-                        .orElseThrow(() -> new InvalidEmailAuthNumException(messageUtil.getMessage("auth-code.invalid")));
+                        .orElseThrow(() -> new InvalidEmailAuthNumException(messageUtil.getMessage(MessageCode.AUTH_CODE_INVALID.getCode())));
 
                 if (authInfo.getExpiredDt().isBefore(LocalDateTime.now())) {
                     authInfo.setUseYn("N");
                     emailAuthInfoService.updateEmailAuthInfo(authInfo);
-                    throw new InvalidEmailAuthNumException(messageUtil.getMessage("auth-code.expired"));
+                    throw new InvalidEmailAuthNumException(messageUtil.getMessage(MessageCode.AUTH_CODE_EXPIRED.getCode()));
                 }
 
                 if (!authInfo.getAuthNum().equals(authNum)) {
-                    throw new InvalidEmailAuthNumException(messageUtil.getMessage("auth-code.invalid"));
+                    throw new InvalidEmailAuthNumException(messageUtil.getMessage(MessageCode.AUTH_CODE_INVALID.getCode()));
                 }
 
                 authInfo.setUseYn("N");
@@ -228,19 +229,19 @@ public class AuthServiceImpl implements AuthService {
 
             case PASSWORD -> {
                 userService.selectUserByEmail(email)
-                        .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
+                        .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
 
                 PasswordFindKeyVo passwordFindKeyVo = passwordFindKeyService.selectPasswordFindKeyByEmail(email)
-                        .orElseThrow(() -> new InvalidPasswordFindKeyException(messageUtil.getMessage("password-key.invalid")));
+                        .orElseThrow(() -> new InvalidPasswordFindKeyException(messageUtil.getMessage(MessageCode.PASSWORD_KEY_INVALID.getCode())));
 
                 if (passwordFindKeyVo.getExpiredDt().isBefore(LocalDateTime.now())) {
                     passwordFindKeyVo.setUseYn("N");
                     passwordFindKeyService.updatePasswordFindKey(passwordFindKeyVo);
-                    throw new InvalidPasswordFindKeyException(messageUtil.getMessage("password-key.expired"));
+                    throw new InvalidPasswordFindKeyException(messageUtil.getMessage(MessageCode.PASSWORD_KEY_EXPIRED.getCode()));
                 }
 
                 if (!passwordFindKeyVo.getKeyValue().equals(authNum)) {
-                    throw new InvalidPasswordFindKeyException(messageUtil.getMessage("password-key.invalid"));
+                    throw new InvalidPasswordFindKeyException(messageUtil.getMessage(MessageCode.PASSWORD_KEY_INVALID.getCode()));
                 }
 
                 result.put("isValid", true);
@@ -257,7 +258,7 @@ public class AuthServiceImpl implements AuthService {
     public void logout(CustomUserDetails customUserDetails) {
         String email = customUserDetails.getUsername();
         UserVo user = userService.selectUserByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
 
         refreshTokenService.deleteRefreshTokenByUserSeq(user.getUserSeq());
     }
@@ -268,16 +269,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void resetPassword(PasswordResetRequest request) {
         PasswordFindKeyVo passwordFindKey = passwordFindKeyService.selectPasswordFindKeyByKey(request.getKey())
-                .orElseThrow(() -> new PasswordFindKeyNotFoundException(messageUtil.getMessage("password-key.invalid")));
+                .orElseThrow(() -> new PasswordFindKeyNotFoundException(messageUtil.getMessage(MessageCode.PASSWORD_KEY_INVALID.getCode())));
 
         if (passwordFindKey.getExpiredDt().isBefore(LocalDateTime.now())) {
             passwordFindKey.setUseYn("N");
             passwordFindKeyService.updatePasswordFindKey(passwordFindKey);
-            throw new InvalidPasswordFindKeyException(messageUtil.getMessage("password-key.expired"));
+            throw new InvalidPasswordFindKeyException(messageUtil.getMessage(MessageCode.PASSWORD_KEY_EXPIRED.getCode()));
         }
 
         UserVo user = userService.selectUserByEmail(passwordFindKey.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
 
         user.setPwd(passwordEncoder.encode(request.getPassword()));
         userService.updateUserPassword(user);
@@ -294,16 +295,16 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = request.getToken();
 
         RefreshTokenVo refreshTokenVo = refreshTokenService.selectRefreshTokenByTokenValue(refreshToken)
-                .orElseThrow(() -> new RefreshTokenNotFoundException(messageUtil.getMessage("refresh-token.not-found")));
+                .orElseThrow(() -> new RefreshTokenNotFoundException(messageUtil.getMessage(MessageCode.REFRESH_TOKEN_NOT_FOUND.getCode())));
 
         if (refreshTokenVo.getExpiredDt().isBefore(LocalDateTime.now())) {
             refreshTokenVo.setUseYn("N");
             refreshTokenService.updateRefreshToken(refreshTokenVo);
-            throw new InvalidRefreshTokenException(messageUtil.getMessage("refresh-token.expired"));
+            throw new InvalidRefreshTokenException(messageUtil.getMessage(MessageCode.REFRESH_TOKEN_EXPIRED.getCode()));
         }
 
         UserVo user = userService.selectUserByUserSeq(refreshTokenVo.getUserSeq())
-                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage("user.not-found")));
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
 
         List<RoleVo> roleList = userService.selectRolesByUserSeq(user.getUserSeq());
         user.setRoleList(roleList);

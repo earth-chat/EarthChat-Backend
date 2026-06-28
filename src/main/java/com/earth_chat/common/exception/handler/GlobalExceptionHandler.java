@@ -1,5 +1,6 @@
 package com.earth_chat.common.exception.handler;
 
+import com.earth_chat.common.enums.MessageCode;
 import com.earth_chat.common.exception.*;
 import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.common.util.ResponseWrapper;
@@ -67,6 +68,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseWrapper> internalServerError(Exception e) {
         log.error("Internal Server Error : ", e);
 
-        return ResponseWrapperUtil.fail(messageUtil.getMessage("server.internal-server-error"), HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseWrapperUtil.fail(messageUtil.getMessage(MessageCode.INTERNAL_SERVER_ERROR.getCode()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

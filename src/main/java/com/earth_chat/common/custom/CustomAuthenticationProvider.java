@@ -1,5 +1,6 @@
 package com.earth_chat.common.custom;
 
+import com.earth_chat.common.enums.MessageCode;
 import com.earth_chat.common.exception.PasswordNotMatchesException;
 import com.earth_chat.common.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
@@ -33,11 +34,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
         if (userDetails == null) {
-            throw new UsernameNotFoundException(messageUtil.getMessage("user.not-found"));
+            throw new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode()));
         }
 
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-            throw new PasswordNotMatchesException(messageUtil.getMessage("user.invalid-password"));
+            throw new PasswordNotMatchesException(messageUtil.getMessage(MessageCode.USER_INVALID_PASSWORD.getCode()));
         }
 
         return new UsernamePasswordAuthenticationToken(userDetails, authentication, userDetails.getAuthorities());
