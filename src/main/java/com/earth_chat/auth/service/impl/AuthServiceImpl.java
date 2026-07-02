@@ -2,6 +2,7 @@ package com.earth_chat.auth.service.impl;
 
 import com.earth_chat.auth.controller.request.*;
 import com.earth_chat.auth.controller.response.LoginResponse;
+import com.earth_chat.auth.controller.response.LoginUserResponse;
 import com.earth_chat.auth.controller.response.RegisterResponse;
 import com.earth_chat.auth.service.*;
 import com.earth_chat.auth.vo.EmailAuthInfoVo;
@@ -105,12 +106,16 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtTokenProvider.createToken(principal);
         RefreshTokenVo refreshTokenVo = refreshTokenService.createToken(principal);
 
-        return LoginResponse.builder()
+        LoginUserResponse userInfo = LoginUserResponse.builder()
                 .userSeq(userVo.getUserSeq())
                 .nickname(userVo.getNickname())
                 .translateCode(userVo.getTranslateCode())
+                .build();
+
+        return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshTokenVo.getTokenValue())
+                .userInfo(userInfo)
                 .build();
     }
 
@@ -313,10 +318,14 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtTokenProvider.createToken(customUserDetails);
 
-        return LoginResponse.builder()
+        LoginUserResponse userInfo = LoginUserResponse.builder()
                 .userSeq(user.getUserSeq())
                 .nickname(user.getNickname())
                 .translateCode(user.getTranslateCode())
+                .build();
+
+        return LoginResponse.builder()
+                .userInfo(userInfo)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

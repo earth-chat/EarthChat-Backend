@@ -18,12 +18,6 @@ public class LoginResponse {
     @Schema(description = "Refresh Token")
     private String refreshToken;
 
-    @Schema(description = "사용자 SEQ")
-    private Long userSeq;
-
-    @Schema(description = "닉네임")
-    private String nickname;
-
-    @Schema(description = "번역 코드")
-    private String translateCode;
+    @Schema(description = "사용자 정보")
+    private LoginUserResponse userInfo;
 }
