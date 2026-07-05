@@ -25,6 +25,9 @@ public class ChatroomVo {
     // 방장 SEQ
     private Long ownerSeq;
 
+    // 방장 닉네임
+    private String ownerNickname;
+
     // 최대 참여 가능 인원
     private Integer maxParticipantNum;
 
