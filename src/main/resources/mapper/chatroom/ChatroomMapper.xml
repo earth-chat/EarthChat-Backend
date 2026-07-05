@@ -48,6 +48,8 @@
         FROM chatroom_info c
         LEFT OUTER JOIN user_info u
         ON c.owner_seq = u.user_seq
+        WHERE c.use_yn = 'Y'
+        ORDER BY reg_dt DESC
         LIMIT #{size}
         OFFSET #{page}
     </select>
@@ -58,7 +60,29 @@
         FROM chatroom_info c
         LEFT OUTER JOIN user_info u
         ON c.owner_seq = u.user_seq
+        WHERE c.use_yn = 'Y'
         LIMIT #{size}
         OFFSET #{page}
     </select>
+
+    <select id="selectChatroomByChatroomSeq" resultType="com.earth_chat.chatroom.vo.ChatroomVo">
+        SELECT
+            c.chatroom_seq,
+            c.chatroom_name,
+            c.chatroom_description,
+            c.owner_seq,
+            c.max_participant_num,
+            c.use_yn,
+            c.public_yn,
+            c.room_pwd,
+            c.reg_dt,
+            c.mod_dt
+        FROM chatroom_info c
+        WHERE c.chatroom_seq = #{chatroomSeq}
+    </select>
+
+    <delete id="deleteChatroom">
+        DELETE FROM chatroom_info
+        WHERE chatroom_seq = #{chatroomSeq}
+    </delete>
 </mapper>

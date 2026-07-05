@@ -30,4 +30,18 @@ public interface ChatroomMapper {
      * @return int
      */
     long selectTotalCountAsPagination(int page, int size);
+
+    /**
+     * 채팅방 조회.
+     * @param chatroomSeq 채팅방 SEQ
+     * @return ChatroomVo
+     */
+    ChatroomVo selectChatroomByChatroomSeq(Long chatroomSeq);
+
+    /**
+     * 채팅방 삭제.
+     * @param chatroomSeq 채팅방 SEQ
+     * @return int
+     */
+    int deleteChatroom(Long chatroomSeq);
 }
