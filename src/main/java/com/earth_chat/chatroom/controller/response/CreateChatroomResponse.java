@@ -31,10 +31,4 @@ public class CreateChatroomResponse {
 
     @Schema(description = "공개 여부")
     private String publicYn;
-
-    @Schema(description = "등록일시")
-    private LocalDateTime regDt;
-
-    @Schema(description = "수정일시")
-    private LocalDateTime modDt;
 }
