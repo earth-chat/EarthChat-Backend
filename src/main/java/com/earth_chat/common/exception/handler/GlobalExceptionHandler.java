@@ -29,7 +29,8 @@ public class GlobalExceptionHandler {
             InvalidEmailAuthNumException.class,
             RequiredEmailAuthException.class,
             InvalidPasswordFindKeyException.class,
-            InvalidRefreshTokenException.class
+            InvalidRefreshTokenException.class,
+            ChatroomOwnerNotMatchesException.class
     })
     public ResponseEntity<ResponseWrapper> badRequest(Exception e) {
         log.error("Bad Request 발생 : ", e);
@@ -52,7 +53,8 @@ public class GlobalExceptionHandler {
             UsernameNotFoundException.class,
             EmailAuthInfoNotFoundException.class,
             RefreshTokenNotFoundException.class,
-            PasswordFindKeyNotFoundException.class
+            PasswordFindKeyNotFoundException.class,
+            ChatroomNotFoundException.class
     })
     public ResponseEntity<ResponseWrapper> notFound(Exception e) {
         log.error("Not Found 발생 : ", e);
