@@ -14,6 +14,10 @@ public enum MessageCode {
     USER_INVALID_PASSWORD("user.invalid-password"),
     USER_REQUIRED_EMAIL_AUTH("user.require-email-auth"),
 
+    // 채팅방 관련 Message Code
+    CHATROOM_NOT_FOUND("chatroom.not-found"),
+    CHATROOM_OWNER_NOT_MATCH("chatroom.owner.not-match"),
+
     // 인증코드 관련 Message Code
     AUTH_CODE_INVALID("auth-code.invalid"),
     AUTH_CODE_EXPIRED("auth-code.expired"),
