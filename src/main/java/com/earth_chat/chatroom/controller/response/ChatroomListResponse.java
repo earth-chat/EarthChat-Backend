@@ -32,6 +32,9 @@ public class ChatroomListResponse {
     @Schema(description = "최대 참여 가능 인원")
     private Integer maxParticipantNum;
 
+    @Schema(description = "현재 참여 인원")
+    private Integer currentParticipantNum;
+
     @Schema(description = "공개 여부")
     private String publicYn;
 
