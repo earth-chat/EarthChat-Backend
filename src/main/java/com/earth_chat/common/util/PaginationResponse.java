@@ -21,8 +21,8 @@ public class PaginationResponse<T> {
     private int page;
 
     // 전체 데이터 개수
-    private long totalSize;
+    private Long totalSize;
 
     // 전체 페이지
-    private long totalPage;
+    private Long totalPage;
 }
