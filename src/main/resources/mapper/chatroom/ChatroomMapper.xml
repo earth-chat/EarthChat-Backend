@@ -32,7 +32,7 @@
         )
     </insert>
 
-    <select id="selectChatroomAsPagination" parameterType="int" resultType="com.earth_chat.chatroom.vo.ChatroomVo">
+    <select id="selectChatroomAsPagination" resultType="com.earth_chat.chatroom.vo.ChatroomVo">
         SELECT
             c.chatroom_seq,
             c.chatroom_name,
@@ -40,6 +40,11 @@
             c.owner_seq,
             u.nickname AS ownerNickname,
             c.max_participant_num,
+            (
+                SELECT COUNT(*)
+                FROM chatroom_participant p
+                WHERE p.chatroom_seq = c.chatroom_seq
+            ) AS currentParticipantNum,
             c.use_yn,
             c.public_yn,
             c.room_pwd,
@@ -49,18 +54,36 @@
         LEFT OUTER JOIN user_info u
         ON c.owner_seq = u.user_seq
         WHERE c.use_yn = 'Y'
+        <if test="text != null and text != ''">
+            AND (
+            c.chatroom_name ILIKE '%' || #{text} || '%'
+            OR c.chatroom_description ILIKE '%' || #{text} || '%'
+            )
+        </if>
+        <if test="filter != null and filter.name() == 'PUBLIC'">
+            AND c.public_yn = 'Y'
+        </if>
         ORDER BY reg_dt DESC
         LIMIT #{size}
         OFFSET #{page}
     </select>
 
-    <select id="selectTotalCountAsPagination" parameterType="int" resultType="long">
+    <select id="selectTotalCountAsPagination" resultType="java.lang.Long">
         SELECT
             COUNT(*)
         FROM chatroom_info c
         LEFT OUTER JOIN user_info u
         ON c.owner_seq = u.user_seq
         WHERE c.use_yn = 'Y'
+        <if test="text != null and text != ''">
+            AND (
+                c.chatroom_name ILIKE '%' || #{text} || '%'
+                OR c.chatroom_description ILIKE '%' || #{text} || '%'
+            )
+        </if>
+        <if test="filter != null and filter.name() == 'PUBLIC'">
+            AND c.public_yn = 'Y'
+        </if>
         LIMIT #{size}
         OFFSET #{page}
     </select>
@@ -85,4 +108,9 @@
         DELETE FROM chatroom_info
         WHERE chatroom_seq = #{chatroomSeq}
     </delete>
+
+    <insert id="insertChatroomParticipant" parameterType="com.earth_chat.chatroom.vo.ChatroomParticipantVo">
+        INSERT INTO chatroom_participant(participant_seq, chatroom_seq, participant_type)
+        VALUES (#{participantSeq}, #{chatroomSeq}, #{participantType})
+    </insert>
 </mapper>
