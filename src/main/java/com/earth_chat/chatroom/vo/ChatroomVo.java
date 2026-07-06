@@ -31,6 +31,9 @@ public class ChatroomVo {
     // 최대 참여 가능 인원
     private Integer maxParticipantNum;
 
+    // 현대 참여 인원
+    private Integer currentParticipantNum;
+
     // 사용 여부
     private String useYn;
 
