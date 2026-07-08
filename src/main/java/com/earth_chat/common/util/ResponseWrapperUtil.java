@@ -123,6 +123,6 @@ public class ResponseWrapperUtil {
                 .result(null)
                 .build();
 
-        return new ResponseEntity<>(responseWrapper, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(responseWrapper, httpStatus);
     }
 }
