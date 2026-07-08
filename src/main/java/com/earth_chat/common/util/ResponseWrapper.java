@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,6 +16,9 @@ public class ResponseWrapper {
 
     @Schema(description = "HTTP 상태 코드", example = "200")
     private int status;
+
+    @Schema(description = "유효성 검증 객체")
+    private List<ValidatedField> validatedFields;
 
     @Schema(description = "메시지", example = "success")
     private String message;
