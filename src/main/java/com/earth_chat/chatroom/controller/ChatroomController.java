@@ -1,6 +1,7 @@
 package com.earth_chat.chatroom.controller;
 
 import com.earth_chat.chatroom.controller.request.CreateChatroomRequest;
+import com.earth_chat.chatroom.controller.request.UpdateChatroomRequest;
 import com.earth_chat.chatroom.service.ChatroomService;
 import com.earth_chat.common.custom.CustomUserDetails;
 import com.earth_chat.common.enums.ChatroomSearchFiltering;
@@ -39,7 +40,7 @@ public class ChatroomController {
             }, description = "사용자를 찾지 못할 경우 발생")
     })
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     @SecurityRequirement(name = "Jwt Auth")
     public ResponseEntity<ResponseWrapper> create(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -63,7 +64,7 @@ public class ChatroomController {
             }, description = "성공 시 반환")
     })
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     @SecurityRequirement(name = "Jwt Auth")
     public ResponseEntity<ResponseWrapper> list(
             @Parameter(description = "페이지 번호", required = true)
@@ -91,7 +92,7 @@ public class ChatroomController {
             }, description = "사용자 혹은 채팅방을 찾지 못할 경우 발생"),
     })
     @DeleteMapping
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     @SecurityRequirement(name = "Jwt Auth")
     public ResponseEntity<ResponseWrapper> delete(
             @Parameter(description = "채팅방 SEQ", required = true)
@@ -99,5 +100,23 @@ public class ChatroomController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         return ResponseWrapperUtil.success("success", chatroomService.delete(customUserDetails, chatroomSeq));
+    }
+
+    @PatchMapping
+    @PreAuthorize("hasRole('USER')")
+    @SecurityRequirement(name = "Jwt Auth")
+    public ResponseEntity<ResponseWrapper> update(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "채팅방 정보 수정 요청 객체",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateChatroomRequest.class)
+                    )
+            )
+            @RequestBody UpdateChatroomRequest request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        return ResponseWrapperUtil.success("success", chatroomService.update(customUserDetails, request));
     }
 }
