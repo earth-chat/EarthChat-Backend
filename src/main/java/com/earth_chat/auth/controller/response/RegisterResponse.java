@@ -1,6 +1,7 @@
 package com.earth_chat.auth.controller.response;
 
 import com.earth_chat.common.enums.UserStatus;
+import com.earth_chat.user.vo.UserVo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,4 +28,19 @@ public class RegisterResponse {
 
     @Schema(description = "번역 코드")
     private String translateCode;
+
+    /**
+     * 응답 객체 생성.
+     * @param userVo 사용자 정보
+     * @return RegisterResponse
+     */
+    public static RegisterResponse of(UserVo userVo) {
+        return RegisterResponse.builder()
+                .userSeq(userVo.getUserSeq())
+                .nickname(userVo.getNickname())
+                .email(userVo.getEmail())
+                .userStatus(userVo.getUserStatus())
+                .translateCode(userVo.getTranslateCode())
+                .build();
+    }
 }
