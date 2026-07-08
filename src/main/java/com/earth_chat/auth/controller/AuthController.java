@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -77,7 +78,7 @@ public class AuthController {
                             schema = @Schema(implementation = RegisterRequest.class)
                     )
             )
-            @RequestBody RegisterRequest request
+            @Validated @RequestBody RegisterRequest request
     ) {
         return ResponseWrapperUtil.success("success", authService.register(request));
     }
@@ -104,7 +105,7 @@ public class AuthController {
                             schema = @Schema(implementation = LoginRequest.class)
                     )
             )
-            @RequestBody LoginRequest loginRequest
+            @Validated @RequestBody LoginRequest loginRequest
     ) {
         return ResponseWrapperUtil.success("success", authService.login(loginRequest));
     }
@@ -131,7 +132,7 @@ public class AuthController {
                             schema = @Schema(implementation = SendMailRequest.class)
                     )
             )
-            @RequestBody SendMailRequest request
+            @Validated @RequestBody SendMailRequest request
     ) {
         authService.sendMail(request);
         return ResponseWrapperUtil.success("success");
@@ -159,7 +160,7 @@ public class AuthController {
                             schema = @Schema(implementation = ValidateMailAuthCodeRequest.class)
                     )
             )
-            @RequestBody ValidateMailAuthCodeRequest request
+            @Validated @RequestBody ValidateMailAuthCodeRequest request
     ) {
         return ResponseWrapperUtil.success("success", authService.validateMailAuthCode(request));
     }
@@ -186,7 +187,7 @@ public class AuthController {
                             schema = @Schema(implementation = PasswordResetRequest.class)
                     )
             )
-            @RequestBody PasswordResetRequest request
+            @Validated @RequestBody PasswordResetRequest request
     ) {
         authService.resetPassword(request);
         return ResponseWrapperUtil.success("success");
@@ -214,7 +215,7 @@ public class AuthController {
                             schema = @Schema(implementation = TokenRefreshRequest.class)
                     )
             )
-            @RequestBody TokenRefreshRequest request
+            @Validated @RequestBody TokenRefreshRequest request
     ) {
         return ResponseWrapperUtil.success("success", authService.refresh(request));
     }

@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -51,7 +52,7 @@ public class ChatroomController {
                             schema = @Schema(implementation = CreateChatroomRequest.class)
                     )
             )
-            @RequestBody CreateChatroomRequest request,
+            @Validated @RequestBody CreateChatroomRequest request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         return ResponseWrapperUtil.success("success", chatroomService.create(customUserDetails, request));
@@ -114,7 +115,7 @@ public class ChatroomController {
                             schema = @Schema(implementation = UpdateChatroomRequest.class)
                     )
             )
-            @RequestBody UpdateChatroomRequest request,
+            @Validated @RequestBody UpdateChatroomRequest request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         return ResponseWrapperUtil.success("success", chatroomService.update(customUserDetails, request));
