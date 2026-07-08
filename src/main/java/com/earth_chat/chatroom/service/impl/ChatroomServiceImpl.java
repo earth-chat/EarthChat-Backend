@@ -1,8 +1,10 @@
 package com.earth_chat.chatroom.service.impl;
 
 import com.earth_chat.chatroom.controller.request.CreateChatroomRequest;
+import com.earth_chat.chatroom.controller.request.UpdateChatroomRequest;
 import com.earth_chat.chatroom.controller.response.ChatroomListResponse;
 import com.earth_chat.chatroom.controller.response.CreateChatroomResponse;
+import com.earth_chat.chatroom.controller.response.UpdateChatroomResponse;
 import com.earth_chat.chatroom.mapper.ChatroomMapper;
 import com.earth_chat.chatroom.service.ChatroomService;
 import com.earth_chat.chatroom.vo.ChatroomParticipantVo;
@@ -21,6 +23,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -77,14 +80,7 @@ public class ChatroomServiceImpl implements ChatroomService {
 
         chatroomMapper.insertChatroomParticipant(chatroomParticipant);
 
-        return CreateChatroomResponse.builder()
-                .chatroomSeq(chatroomInfo.getChatroomSeq())
-                .name(chatroomInfo.getChatroomName())
-                .description(chatroomInfo.getChatroomDescription())
-                .ownerSeq(chatroomInfo.getOwnerSeq())
-                .maxParticipantNum(chatroomInfo.getMaxParticipantNum())
-                .publicYn(chatroomInfo.getPublicYn())
-                .build();
+        return CreateChatroomResponse.of(chatroomInfo);
     }
 
     /**
@@ -98,20 +94,8 @@ public class ChatroomServiceImpl implements ChatroomService {
 
         List<ChatroomVo> chatroomList = chatroomMapper.selectChatroomAsPagination(page, size, text, filter);
         List<ChatroomListResponse> content = chatroomList.stream()
-                .map(chatroom -> {
-                    return ChatroomListResponse.builder()
-                            .chatroomSeq(chatroom.getChatroomSeq())
-                            .name(chatroom.getChatroomName())
-                            .description(chatroom.getChatroomDescription())
-                            .ownerSeq(chatroom.getOwnerSeq())
-                            .ownerNickname(chatroom.getOwnerNickname())
-                            .maxParticipantNum(chatroom.getMaxParticipantNum())
-                            .currentParticipantNum(chatroom.getCurrentParticipantNum())
-                            .publicYn(chatroom.getPublicYn())
-                            .regDt(chatroom.getRegDt())
-                            .modDt(chatroom.getModDt())
-                            .build();
-                }).toList();
+                .map(ChatroomListResponse::of)
+                .toList();
 
         Long totalPage = (totalCount + size - 1) / size;
 
@@ -129,19 +113,69 @@ public class ChatroomServiceImpl implements ChatroomService {
      */
     @Override
     public int delete(CustomUserDetails customUserDetails, Long chatroomSeq) {
-        ChatroomVo chatroom = Optional.ofNullable(chatroomMapper.selectChatroomByChatroomSeq(chatroomSeq))
+        ChatroomVo chatroom = selectChatroomByChatroomSeq(chatroomSeq)
                 .orElseThrow(() -> new ChatroomNotFoundException(messageUtil.getMessage(MessageCode.CHATROOM_NOT_FOUND.getCode())));
 
-        UserVo owner = userService.selectUserByEmail(customUserDetails.getUsername())
+        UserVo user = userService.selectUserByEmail(customUserDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
 
         Long ownerSeq = chatroom.getOwnerSeq();
-        if (!ownerSeq.equals(owner.getUserSeq())) {
+        if (!ownerSeq.equals(user.getUserSeq())) {
             throw new ChatroomOwnerNotMatchesException(messageUtil.getMessage(MessageCode.CHATROOM_OWNER_NOT_MATCH.getCode()));
         }
 
         return chatroomMapper.deleteChatroom(chatroomSeq);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UpdateChatroomResponse update(CustomUserDetails customUserDetails, UpdateChatroomRequest request) {
 
+        UserVo user = userService.selectUserByEmail(customUserDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException(messageUtil.getMessage(MessageCode.USER_NOT_FOUND.getCode())));
+
+        ChatroomVo chatroom = selectChatroomByChatroomSeq(request.getChatroomSeq())
+                .orElseThrow(() -> new ChatroomNotFoundException(messageUtil.getMessage(MessageCode.CHATROOM_NOT_FOUND.getCode())));
+
+        Long ownerSeq = chatroom.getOwnerSeq();
+        if (!ownerSeq.equals(user.getUserSeq())) {
+            throw new ChatroomOwnerNotMatchesException(messageUtil.getMessage(MessageCode.CHATROOM_OWNER_NOT_MATCH.getCode()));
+        }
+
+        if (StringUtils.hasText(request.getName())) {
+            chatroom.setChatroomName(request.getName());
+        }
+
+        if (StringUtils.hasText(request.getDescription())) {
+            chatroom.setChatroomDescription(request.getDescription());
+        }
+
+        if (request.getMaxParticipantNum() != null) {
+            chatroom.setMaxParticipantNum(request.getMaxParticipantNum());
+        }
+
+        if (StringUtils.hasText(request.getPublicYn())) {
+            chatroom.setPublicYn(request.getPublicYn());
+
+            if (request.getPublicYn().equals("N")) {
+
+                if (StringUtils.hasText(request.getRoomPwd())) {
+                    chatroom.setRoomPwd(passwordEncoder.encode(request.getRoomPwd()));
+                }
+            }
+        }
+
+        chatroomMapper.updateChatroom(chatroom);
+
+        return UpdateChatroomResponse.of(chatroom);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Optional<ChatroomVo> selectChatroomByChatroomSeq(Long chatroomSeq) {
+        return Optional.ofNullable(chatroomMapper.selectChatroomByChatroomSeq(chatroomSeq));
+    }
 }
