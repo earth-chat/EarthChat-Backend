@@ -81,13 +81,7 @@ public class AuthServiceImpl implements AuthService {
         userService.insertUser(userVo);
         userService.insertUserRole(userVo);
 
-        return RegisterResponse.builder()
-                .userSeq(userVo.getUserSeq())
-                .nickname(userVo.getNickname())
-                .email(userVo.getEmail())
-                .userStatus(userVo.getUserStatus())
-                .translateCode(userVo.getTranslateCode())
-                .build();
+        return RegisterResponse.of(userVo);
     }
 
     /**
