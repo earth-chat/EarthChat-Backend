@@ -113,4 +113,17 @@
         INSERT INTO chatroom_participant(participant_seq, chatroom_seq, participant_type)
         VALUES (#{participantSeq}, #{chatroomSeq}, #{participantType})
     </insert>
+
+    <update id="updateChatroom" parameterType="com.earth_chat.chatroom.vo.ChatroomVo">
+        UPDATE chatroom_info
+        SET
+            chatroom_name = #{chatroomName},
+            chatroom_description = #{chatroomDescription},
+            max_participant_num = #{maxParticipantNum},
+            public_yn = #{publicYn},
+            room_pwd = #{roomPwd},
+            mod_dt = NOW()
+        WHERE chatroom_seq = #{chatroomSeq}
+        AND use_yn = 'Y'
+    </update>
 </mapper>

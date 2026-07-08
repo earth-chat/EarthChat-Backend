@@ -53,4 +53,11 @@ public interface ChatroomMapper {
      * @return int
      */
     int deleteChatroom(Long chatroomSeq);
+
+    /**
+     * 채팅방 정보 수정.
+     * @param chatroom 채팅방 정보
+     * @return int
+     */
+    int updateChatroom(ChatroomVo chatroom);
 }
