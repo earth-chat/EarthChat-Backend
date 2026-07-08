@@ -5,13 +5,19 @@ import com.earth_chat.common.exception.*;
 import com.earth_chat.common.util.MessageUtil;
 import com.earth_chat.common.util.ResponseWrapper;
 import com.earth_chat.common.util.ResponseWrapperUtil;
+import com.earth_chat.common.util.ValidatedField;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -21,7 +27,22 @@ public class GlobalExceptionHandler {
     private final MessageUtil messageUtil;
 
     // 400
-    
+
+    @ExceptionHandler(value = { MethodArgumentNotValidException.class })
+    public ResponseEntity<ResponseWrapper> methodArgumentNotValidException(MethodArgumentNotValidException e) {
+        List<ValidatedField> validatedFields = e.getAllErrors().stream()
+                .map(error -> {
+                    String fieldName = ((FieldError) error).getField();
+
+                    return ValidatedField.builder()
+                            .fieldName(fieldName)
+                            .validatedMessage(error.getDefaultMessage())
+                            .build();
+                }).toList();
+
+        return ResponseWrapperUtil.fail("fail", validatedFields, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(value = {
             AlreadyExistsEmailException.class,
             AlreadyExistsNicknameException.class,
