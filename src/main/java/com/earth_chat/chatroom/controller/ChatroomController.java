@@ -103,6 +103,18 @@ public class ChatroomController {
         return ResponseWrapperUtil.success("success", chatroomService.delete(customUserDetails, chatroomSeq));
     }
 
+    @Operation(summary = "채팅방 수정 API", description = "채팅방 수정 API ( 방장만 삭제 가능 )")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "400", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "방장 아닌 사용자가 수정 요청을 했을 경우 발생"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseWrapper.class))
+            }, description = "사용자 혹은 채팅방을 찾지 못할 경우 발생"),
+    })
     @PatchMapping
     @PreAuthorize("hasRole('USER')")
     @SecurityRequirement(name = "Jwt Auth")
