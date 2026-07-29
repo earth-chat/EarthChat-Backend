@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.earth_chat.commoncode.mapper.CommonCodeMapper">
+
+    <select id="selectGroupCodes" resultType="com.earth_chat.commoncode.vo.CommonCodeVo">
+        SELECT
+            cg.group_code,
+            cg.group_name,
+            cg.group_description,
+            cg.use_yn,
+            cg.reg_dt,
+            cg.mod_dt
+        FROM common_group_code cg
+    </select>
+
+    <select id="selectCodeDetailByGroupCode" parameterType="string" resultType="com.earth_chat.commoncode.vo.CommonCodeDetailVo">
+        SELECT
+            c.group_code,
+            c.code,
+            c.code_name,
+            c.code_description,
+            c.use_yn,
+            c.reg_dt,
+            c.mod_dt
+        FROM common_code_detail c
+        WHERE group_code = #{groupCode}
+    </select>
+
+</mapper>
