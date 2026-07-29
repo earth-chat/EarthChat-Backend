@@ -30,6 +30,8 @@ public enum MessageCode {
     REFRESH_TOKEN_NOT_FOUND("refresh-token.not-found"),
     REFRESH_TOKEN_EXPIRED("refresh-token.expired"),
 
+    ACCESS_TOKEN_INVALID("access-token.invalid"),
+
     // 인증 관련 Message Code
     AUTH_UNAUTHORIZED("auth.unauthorized"),
 
